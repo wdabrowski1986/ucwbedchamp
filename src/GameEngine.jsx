@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PLAYER_WAYNE, PLAYER_CINDY, GAME_MODES, CLOTHING_LAYERS } from './gameData';
 import { MOVE_DETAILS } from './moveDetails';
+import useMobile from './hooks/useMobile';
 const MOVES = [
   // General Moves
   { name: 'Domination Mount', type: 'Physical', damage: 20, cost: 15, accuracy: 85, special: '' },
@@ -139,6 +140,7 @@ function GameEngine({ modeKey, enabledMoves }) {
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState('');
   const [submissions, setSubmissions] = useState({ Wayne: 0, Cindy: 0 });
+  const isMobile = useMobile(768);
 
   // Deck system for move selection
   const [moveDeck, setMoveDeck] = useState([]);
@@ -289,6 +291,19 @@ function GameEngine({ modeKey, enabledMoves }) {
 
   // Erotic Fight Mode: Only show special UI
   if (modeKey === 'eroticfight') {
+    const eroticButtonBase = {
+      fontSize: isMobile ? '1.6em' : '2.7em',
+      padding: isMobile ? '0.9em 1.4em' : '1.1em 2.7em',
+      borderRadius: isMobile ? '18px' : '22px',
+      color: '#fff',
+      cursor: 'pointer',
+      fontWeight: 'bold',
+      boxShadow: '0 0 32px #ff007f99, 0 0 8px #000',
+      textShadow: '0 2px 8px #000',
+      transition: 'transform 0.1s',
+      width: isMobile ? '100%' : 'auto',
+      maxWidth: isMobile ? '360px' : 'none',
+    };
     return (
       <div
         style={{
@@ -300,57 +315,54 @@ function GameEngine({ modeKey, enabledMoves }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          padding: '0',
+          justifyContent: isMobile ? 'flex-start' : 'center',
+          padding: isMobile ? '32px 16px 72px' : '0',
           margin: '0',
         }}
       >
         <div style={{
-          fontSize: '3.2em',
+          fontSize: isMobile ? '2.4em' : '3.2em',
           fontWeight: 'bold',
           color: '#ff007f',
           letterSpacing: '0.08em',
-          marginBottom: '30px',
+          marginBottom: isMobile ? '22px' : '30px',
           textShadow: '0 0 16px #b5179e, 0 0 8px #000',
           borderBottom: '2px solid #ff007f',
           paddingBottom: '0.2em',
-          width: 'min(90vw, 600px)',
+          width: '100%',
+          maxWidth: '600px',
         }}>
           <span style={{ fontFamily: '"UnifrakturCook", "Cinzel", serif' }}>Drain Each Other</span>
         </div>
         <div style={{
-          fontSize: '2.7em',
+          fontSize: isMobile ? '1.8em' : '2.7em',
           color: '#fff',
           background: 'rgba(30,0,40,0.7)',
           border: '2px solid #b5179e',
           borderRadius: '18px',
           boxShadow: '0 0 24px #b5179e55',
-          padding: '0.3em 1.5em',
-          marginBottom: '38px',
+          padding: isMobile ? '0.25em 1em' : '0.3em 1.5em',
+          marginBottom: isMobile ? '28px' : '38px',
           fontWeight: 700,
           letterSpacing: '0.04em',
+          width: isMobile ? '100%' : 'auto',
         }}>
           <span style={{ color: '#ff007f', fontWeight: 900 }}>Timer:</span> {formatTime(timer)}
         </div>
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '80px',
-          marginBottom: '38px',
+          gap: isMobile ? '18px' : '80px',
+          marginBottom: isMobile ? '28px' : '38px',
+          flexDirection: isMobile ? 'column' : 'row',
+          width: '100%',
+          maxWidth: '700px',
         }}>
           <button
             style={{
-              fontSize: '2.7em',
-              padding: '1.1em 2.7em',
-              borderRadius: '22px',
+              ...eroticButtonBase,
               background: 'linear-gradient(120deg, #ff007f 0%, #2d002d 100%)',
-              color: '#fff',
               border: '3px solid #b5179e',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              boxShadow: '0 0 32px #ff007f99, 0 0 8px #000',
-              textShadow: '0 2px 8px #000',
-              transition: 'transform 0.1s',
             }}
             onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
             onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -364,17 +376,9 @@ function GameEngine({ modeKey, enabledMoves }) {
           </button>
           <button
             style={{
-              fontSize: '2.7em',
-              padding: '1.1em 2.7em',
-              borderRadius: '22px',
+              ...eroticButtonBase,
               background: 'linear-gradient(120deg, #b5179e 0%, #0a001a 100%)',
-              color: '#fff',
               border: '3px solid #ff007f',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              boxShadow: '0 0 32px #b5179e99, 0 0 8px #000',
-              textShadow: '0 2px 8px #000',
-              transition: 'transform 0.1s',
             }}
             onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
             onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -388,39 +392,45 @@ function GameEngine({ modeKey, enabledMoves }) {
           </button>
         </div>
         <div style={{
-          fontSize: '2.2em',
+          fontSize: isMobile ? '1.4em' : '2.2em',
           color: '#fff',
           fontWeight: 'bold',
-          marginTop: '28px',
+          marginTop: isMobile ? '18px' : '28px',
           background: 'rgba(30,0,40,0.7)',
           border: '2px solid #ff007f',
           borderRadius: '14px',
-          padding: '0.2em 1.2em',
+          padding: '0.2em 1em',
           boxShadow: '0 0 16px #ff007f55',
+          width: '100%',
+          maxWidth: '420px',
         }}>
           <span style={{ color: '#ff007f', fontWeight: 900 }}>Scoreboard:</span> Wayne {score.Wayne} - Cindy {score.Cindy}
         </div>
         <div style={{
-          fontSize: '1.8em',
+          fontSize: isMobile ? '1.2em' : '1.8em',
           color: '#ff007f',
           fontWeight: 'bold',
-          marginTop: '22px',
+          marginTop: isMobile ? '16px' : '22px',
           background: 'rgba(30,0,40,0.7)',
           border: '2px solid #b5179e',
           borderRadius: '14px',
-          padding: '0.2em 1.2em',
+          padding: '0.2em 1em',
           boxShadow: '0 0 16px #b5179e55',
+          width: '100%',
+          maxWidth: '420px',
         }}>
           <span style={{ color: '#fff', fontWeight: 700 }}>Orgasms:</span> Wayne {orgasms.Wayne} &nbsp;|&nbsp; Cindy {orgasms.Cindy}
         </div>
         <div style={{
-          position: 'fixed',
-          bottom: '18px',
-          right: '24px',
+          position: isMobile ? 'relative' : 'fixed',
+          bottom: isMobile ? 'unset' : '18px',
+          right: isMobile ? 'unset' : '24px',
           color: '#b5179e',
           fontSize: '1.1em',
           opacity: 0.7,
           fontFamily: 'monospace',
+          marginTop: isMobile ? '36px' : '0',
+          textAlign: 'center',
         }}>
           <span>UCW BedChamp &bull; Erotic Wrestling</span>
         </div>
@@ -436,7 +446,7 @@ function GameEngine({ modeKey, enabledMoves }) {
         color: '#f7e1ff',
         fontFamily: '"Cinzel", "Playfair Display", serif',
         textShadow: '0 2px 12px #000, 0 0 2px #b5179e',
-        padding: '40px 5vw 80px',
+        padding: isMobile ? '32px 16px 72px' : '40px 5vw 80px',
         position: 'relative',
       }}
     >
@@ -457,29 +467,31 @@ function GameEngine({ modeKey, enabledMoves }) {
               background: '#1a001f',
               border: '2px solid #ff007f',
               borderRadius: 20,
-              padding: '32px 48px',
+              padding: isMobile ? '24px 28px' : '32px 48px',
               textAlign: 'center',
               boxShadow: '0 0 36px #ff007f66',
             }}
           >
-            <div style={{ fontSize: '2em', fontWeight: 700, marginBottom: 12 }}>Coin Flip</div>
-            <div style={{ fontSize: '1.35em' }}>{coinFlipResult} attacks first!</div>
+            <div style={{ fontSize: isMobile ? '1.6em' : '2em', fontWeight: 700, marginBottom: 12 }}>Coin Flip</div>
+            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em' }}>{coinFlipResult} attacks first!</div>
           </div>
         </div>
       )}
       <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', marginBottom: '28px' }}>
-          <div style={{ fontSize: '2.2em', fontWeight: 700 }}>{mode.name}</div>
-          <div style={{ fontSize: '1.15em', letterSpacing: '0.08em' }}>Round {round}</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '10px' : '16px', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: isMobile ? '20px' : '28px', flexDirection: isMobile ? 'column' : 'row' }}>
+          <div style={{ fontSize: isMobile ? '1.8em' : '2.2em', fontWeight: 700 }}>{mode.name}</div>
+          <div style={{ fontSize: isMobile ? '1em' : '1.15em', letterSpacing: '0.08em' }}>Round {round}</div>
           {showTimerBox && (
             <div
               style={{
-                marginLeft: 'auto',
-                fontSize: '1.35em',
+                marginLeft: isMobile ? 0 : 'auto',
+                fontSize: isMobile ? '1.1em' : '1.35em',
                 border: '2px solid #ff007f',
                 borderRadius: 14,
-                padding: '0.35em 1.1em',
+                padding: isMobile ? '0.3em 0.9em' : '0.35em 1.1em',
                 background: 'rgba(10,0,30,0.7)',
+                width: isMobile ? '100%' : 'auto',
+                textAlign: isMobile ? 'left' : 'center',
               }}
             >
               <span style={{ color: '#ff007f', fontWeight: 700 }}>{timerBoxLabel}:</span> {timerBoxValue}
@@ -487,14 +499,14 @@ function GameEngine({ modeKey, enabledMoves }) {
           )}
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', marginBottom: '28px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '14px' : '18px', marginBottom: isMobile ? '22px' : '28px', flexDirection: isMobile ? 'column' : 'row' }}>
           <div
             style={{
-              flex: '1 1 260px',
+              flex: isMobile ? '1 1 100%' : '1 1 260px',
               background: 'rgba(10,0,30,0.65)',
               border: '1px solid #ff007f',
               borderRadius: 18,
-              padding: '18px 20px',
+              padding: isMobile ? '16px 18px' : '18px 20px',
             }}
           >
             <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Scoreboard</div>
@@ -502,11 +514,11 @@ function GameEngine({ modeKey, enabledMoves }) {
           </div>
           <div
             style={{
-              flex: '1 1 260px',
+              flex: isMobile ? '1 1 100%' : '1 1 260px',
               background: 'rgba(10,0,30,0.65)',
               border: '1px solid #b5179e',
               borderRadius: 18,
-              padding: '18px 20px',
+              padding: isMobile ? '16px 18px' : '18px 20px',
             }}
           >
             <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Submissions</div>
@@ -514,11 +526,11 @@ function GameEngine({ modeKey, enabledMoves }) {
           </div>
           <div
             style={{
-              flex: '1 1 260px',
+              flex: isMobile ? '1 1 100%' : '1 1 260px',
               background: 'rgba(10,0,30,0.65)',
               border: '1px solid #646cff',
               borderRadius: 18,
-              padding: '18px 20px',
+              padding: isMobile ? '16px 18px' : '18px 20px',
             }}
           >
             <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Attacker</div>
@@ -526,7 +538,7 @@ function GameEngine({ modeKey, enabledMoves }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', marginBottom: '30px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px', marginBottom: isMobile ? '24px' : '30px' }}>
           {players.map(player => {
             const maxHp = player.data.maxHp || 100;
             const hpPercent = Math.max(0, Math.round((player.data.hp / maxHp) * 100));
@@ -534,19 +546,20 @@ function GameEngine({ modeKey, enabledMoves }) {
               <div
                 key={player.key}
                 style={{
-                  flex: '1 1 320px',
+                  flex: isMobile ? '1 1 100%' : '1 1 320px',
+                  width: isMobile ? '100%' : 'auto',
                   background: 'rgba(8,0,24,0.78)',
-                  padding: '22px',
+                  padding: isMobile ? '18px' : '22px',
                   borderRadius: 20,
                   border: `1px solid ${player.accent}`,
                   boxShadow: '0 0 24px rgba(0,0,0,0.45)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                  <span style={{ fontSize: '1.35em', fontWeight: 700 }}>{player.key}</span>
+                  <span style={{ fontSize: isMobile ? '1.15em' : '1.35em', fontWeight: 700 }}>{player.key}</span>
                   <span
                     style={{
-                      fontSize: '0.92em',
+                      fontSize: isMobile ? '0.85em' : '0.92em',
                       letterSpacing: '0.08em',
                       color: attacker === player.key ? '#ff007f' : '#ccc',
                     }}
@@ -586,12 +599,12 @@ function GameEngine({ modeKey, enabledMoves }) {
           style={{
             background: 'rgba(8,0,24,0.78)',
             borderRadius: 24,
-            padding: '28px',
+            padding: isMobile ? '20px' : '28px',
             border: '1px solid #ff007f',
-            marginBottom: '28px',
+            marginBottom: isMobile ? '24px' : '28px',
           }}
         >
-          <div style={{ fontSize: '1.6em', fontWeight: 700, marginBottom: 12 }}>Current Move</div>
+          <div style={{ fontSize: isMobile ? '1.3em' : '1.6em', fontWeight: 700, marginBottom: 12 }}>Current Move</div>
           {move ? (
             <div style={{ textAlign: 'left' }}>
               <div style={{ fontSize: '1.35em', marginBottom: 6 }}>{move.name}</div>
@@ -612,7 +625,7 @@ function GameEngine({ modeKey, enabledMoves }) {
           {!move && !moveStatusMessage && (
             <div style={{ fontSize: '1.05em', color: '#f0caff', marginTop: 8 }}>Preparing next move...</div>
           )}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginTop: '18px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginTop: '18px', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
             <button
               onClick={handleSubmit}
               disabled={actionDisabled}
@@ -629,6 +642,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                 cursor: actionDisabled ? 'not-allowed' : 'pointer',
                 fontWeight: 700,
                 textShadow: '0 2px 8px #000',
+                width: isMobile ? '100%' : 'auto',
               }}
             >
               {submitted ? 'Resolving...' : 'Execute Move'}
@@ -646,6 +660,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                 color: '#fff',
                 cursor: submitted || showCoinFlip ? 'not-allowed' : 'pointer',
                 fontWeight: 600,
+                width: isMobile ? '100%' : 'auto',
               }}
             >
               Force Next Turn
@@ -667,6 +682,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                   color: '#fff',
                   cursor: 'pointer',
                   fontWeight: 600,
+                  width: isMobile ? '100%' : 'auto',
                 }}
               >
                 View Move Art
@@ -683,12 +699,13 @@ function GameEngine({ modeKey, enabledMoves }) {
           style={{
             background: 'rgba(10,0,30,0.65)',
             borderRadius: 20,
-            padding: '22px',
+            padding: isMobile ? '18px' : '22px',
             border: '1px solid #646cff',
             marginBottom: '20px',
+            width: '100%',
           }}
         >
-          <div style={{ fontSize: '1.25em', fontWeight: 700, marginBottom: 6 }}>Match Log</div>
+          <div style={{ fontSize: isMobile ? '1.1em' : '1.25em', fontWeight: 700, marginBottom: 6 }}>Match Log</div>
           <div style={{ fontSize: '1em', color: message ? '#fff' : '#c9c9ff' }}>
             {message || 'Awaiting the next move...'}
           </div>
@@ -698,7 +715,7 @@ function GameEngine({ modeKey, enabledMoves }) {
         </div>
 
         {modeKey === 'suddendeath' && finalStand && (
-          <div style={{ fontSize: '1.35em', color: '#ffaaaa', marginTop: '10px', fontWeight: 'bold', textAlign: 'left' }}>
+          <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', color: '#ffaaaa', marginTop: '10px', fontWeight: 'bold', textAlign: 'left', width: '100%' }}>
             Sudden Death Shootout Results:
             <div style={{ fontSize: '0.9em', color: '#f7e1ff', marginTop: '8px' }}>
               Wayne lasted: {shootoutTurns.Wayne || '-'} seconds
@@ -747,9 +764,9 @@ function GameEngine({ modeKey, enabledMoves }) {
             style={{
               background: '#fff',
               color: '#111',
-              padding: '24px',
+              padding: isMobile ? '18px' : '24px',
               borderRadius: 18,
-              width: 'min(420px, 90vw)',
+              width: isMobile ? 'min(420px, 92vw)' : 'min(420px, 90vw)',
               textAlign: 'center',
               boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
             }}
@@ -777,6 +794,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                 color: '#fff',
                 cursor: 'pointer',
                 fontWeight: 600,
+                width: isMobile ? '100%' : 'auto',
               }}
             >
               Close
