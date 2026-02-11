@@ -14,8 +14,8 @@ body {
   margin: 0;
   min-height: 100vh;
   width: 100%;
-  background: radial-gradient(circle at 20% -10%, #320014 0%, #08000e 55%, #010103 100%);
-  color: #f7e1ff;
+  background: radial-gradient(circle at 15% -5%, #150000 0%, #050001 48%, #000000 100%);
+  color: #ffeef1;
   position: relative;
   overflow-x: hidden;
 }
@@ -24,10 +24,10 @@ body::before {
   content: '';
   position: fixed;
   inset: -15%;
-  background: radial-gradient(circle at 25% 20%, rgba(255, 0, 128, 0.14), transparent 55%),
-    radial-gradient(circle at 75% 80%, rgba(120, 0, 255, 0.12), transparent 55%);
-  filter: blur(60px);
-  opacity: 0.7;
+  background: radial-gradient(circle at 25% 20%, rgba(229, 9, 20, 0.22), transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(120, 0, 0, 0.2), transparent 55%);
+  filter: blur(70px);
+  opacity: 0.65;
   pointer-events: none;
   z-index: -2;
 }
@@ -36,18 +36,18 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 90px);
-  opacity: 0.1;
+  background-image: repeating-linear-gradient(135deg, rgba(229, 9, 20, 0.06) 0 2px, transparent 2px 90px);
+  opacity: 0.12;
   pointer-events: none;
   z-index: -1;
 }
 
 a {
-  color: #ff007f;
+  color: #ff1e56;
   text-decoration: none;
 }
 a:hover {
-  color: #ff2d95;
+  color: #ff4757;
 }
 
 button {

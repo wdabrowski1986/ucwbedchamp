@@ -51,19 +51,19 @@ const MOVES = [
 ];
 
 const DUNGEON_THEME = {
-  background: 'radial-gradient(circle at 20% -10%, #3c0018 0%, #08000c 55%, #010104 100%)',
-  velvetGlow: 'radial-gradient(circle, rgba(255, 0, 128, 0.12) 0%, transparent 40%)',
-  lattice: 'repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 80px)',
-  panel: 'linear-gradient(160deg, rgba(8,0,18,0.92) 0%, rgba(5,0,10,0.78) 100%)',
-  softPanel: 'linear-gradient(150deg, rgba(18,0,30,0.85), rgba(6,0,14,0.65))',
-  borderPrimary: 'rgba(255, 45, 149, 0.55)',
-  borderSecondary: 'rgba(135, 58, 160, 0.55)',
-  glowPrimary: '0 0 28px rgba(255, 45, 149, 0.35)',
-  glowSecondary: '0 0 20px rgba(100, 108, 255, 0.35)',
-  neonPink: '#ff2d95',
-  neonViolet: '#9f3ce3',
+  background: 'radial-gradient(circle at 12% -8%, #1a0004 0%, #050104 48%, #000000 100%)',
+  velvetGlow: 'radial-gradient(circle at 40% 20%, rgba(229, 9, 20, 0.2), transparent 55%)',
+  lattice: 'repeating-linear-gradient(135deg, rgba(255, 36, 46, 0.05) 0 2px, transparent 2px 80px)',
+  panel: 'linear-gradient(165deg, rgba(6,0,2,0.95), rgba(26,0,6,0.82))',
+  softPanel: 'linear-gradient(160deg, rgba(12,0,4,0.9), rgba(40,0,10,0.72))',
+  borderPrimary: 'rgba(229, 9, 20, 0.7)',
+  borderSecondary: 'rgba(255, 75, 43, 0.55)',
+  glowPrimary: '0 0 32px rgba(229, 9, 20, 0.38)',
+  glowSecondary: '0 0 24px rgba(255, 75, 43, 0.35)',
+  neonPink: '#ff1e56',
+  neonViolet: '#c21807',
   ember: '#ffb347',
-  textMuted: '#c8a5d4',
+  textMuted: '#d9b2b2',
 };
 
 // ...existing code...
@@ -269,8 +269,8 @@ function GameEngine({ modeKey, enabledMoves }) {
   const wayneClothing = modeKey === 'quick' ? null : modeKey === 'ironwoman' ? ironWomanClothing : getClothingLayer(wayne.hp);
   const cindyClothing = modeKey === 'quick' ? null : modeKey === 'ironwoman' ? ironWomanClothing : getClothingLayer(cindy.hp);
   const players = [
-    { key: 'Wayne', data: wayne, clothing: wayneClothing, accent: '#4cc9f0' },
-    { key: 'Cindy', data: cindy, clothing: cindyClothing, accent: '#ff6b6b' },
+    { key: 'Wayne', data: wayne, clothing: wayneClothing, accent: '#d62828' },
+    { key: 'Cindy', data: cindy, clothing: cindyClothing, accent: '#ff4d6d' },
   ];
   const attackerPool = MOVES.filter(
     m => enabledMoves.includes(m.name) && (!m.character || m.character === attacker)
@@ -304,30 +304,35 @@ function GameEngine({ modeKey, enabledMoves }) {
     ? `${attackerPool.length} move${attackerPool.length === 1 ? '' : 's'} available for ${attacker}`
     : 'No eligible moves for current attacker.';
   const actionDisabled = submitted || !move || showCoinFlip;
+  const layoutPadding = isMobile ? '28px 14px 90px' : '60px clamp(32px,6vw,96px) 120px';
   const statCardStyle = {
     flex: isMobile ? '1 1 100%' : '1 1 260px',
-    background: DUNGEON_THEME.panel,
+    background: 'linear-gradient(150deg, rgba(6,0,0,0.92), rgba(30,0,8,0.78))',
     borderRadius: 24,
-    padding: isMobile ? '17px 18px' : '20px 22px',
+    padding: isMobile ? '16px 18px' : '20px 22px',
     border: '1px solid rgba(255,255,255,0.08)',
-    boxShadow: '0 30px 55px rgba(0,0,0,0.45)',
+    boxShadow: '0 30px 55px rgba(0,0,0,0.55)',
+    textAlign: isMobile ? 'center' : 'left',
+    backdropFilter: 'blur(4px)',
   };
   const playerCardBase = {
-    background: 'linear-gradient(165deg, rgba(8,0,18,0.95), rgba(2,0,8,0.75))',
+    background: 'linear-gradient(160deg, rgba(8,0,0,0.96), rgba(32,0,6,0.78))',
     borderRadius: 28,
-    padding: isMobile ? '20px' : '24px',
-    boxShadow: '0 40px 70px rgba(0,0,0,0.55)',
+    padding: isMobile ? '20px' : '26px',
+    boxShadow: '0 40px 70px rgba(0,0,0,0.6)',
     position: 'relative',
     overflow: 'hidden',
   };
   const primaryButtonBase = {
     flex: '0 0 auto',
-    fontSize: '1.05em',
-    padding: '0.75em 2.4em',
+    fontSize: isMobile ? '0.95em' : '1.05em',
+    padding: isMobile ? '0.8em 1.6em' : '0.75em 2.4em',
     borderRadius: 18,
     fontWeight: 700,
     transition: 'transform 0.15s ease, box-shadow 0.15s ease',
     width: isMobile ? '100%' : 'auto',
+    display: 'inline-flex',
+    justifyContent: 'center',
   };
 
   // Erotic Fight Mode: Only show special UI
@@ -353,12 +358,12 @@ function GameEngine({ modeKey, enabledMoves }) {
           background: DUNGEON_THEME.background,
           color: '#f7e1ff',
           fontFamily: '"Cinzel", "Playfair Display", serif',
-          textShadow: '0 2px 12px #000, 0 0 2px #b5179e',
+          textShadow: '0 2px 12px #000, 0 0 3px #e50914',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: isMobile ? 'flex-start' : 'center',
-          padding: isMobile ? '36px 16px 72px' : '60px 0 80px',
+          padding: layoutPadding,
           margin: '0',
           position: 'relative',
           overflow: 'hidden',
@@ -434,8 +439,8 @@ function GameEngine({ modeKey, enabledMoves }) {
             <button
               style={{
                 ...eroticButtonBase,
-                background: 'linear-gradient(135deg, #ff2d95 0%, #4b0033 100%)',
-                borderColor: 'rgba(255,45,149,0.5)',
+                background: 'linear-gradient(135deg, #e50914 0%, #3b0004 100%)',
+                borderColor: 'rgba(229,9,20,0.45)',
               }}
               onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
               onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -450,8 +455,8 @@ function GameEngine({ modeKey, enabledMoves }) {
             <button
               style={{
                 ...eroticButtonBase,
-                background: 'linear-gradient(135deg, #9f3ce3 0%, #0a001a 100%)',
-                borderColor: 'rgba(159,60,227,0.5)',
+                background: 'linear-gradient(135deg, #ff4d6d 0%, #160001 100%)',
+                borderColor: 'rgba(255,77,109,0.45)',
               }}
               onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
               onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -470,7 +475,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               color: '#fff',
               fontWeight: 'bold',
               marginTop: isMobile ? '18px' : '28px',
-              background: 'linear-gradient(140deg, rgba(20,0,34,0.8), rgba(5,0,10,0.6))',
+              background: 'linear-gradient(150deg, rgba(12,0,0,0.85), rgba(48,0,6,0.7))',
               border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
               borderRadius: '18px',
               padding: '0.3em 1.1em',
@@ -487,7 +492,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               color: DUNGEON_THEME.neonPink,
               fontWeight: 'bold',
               marginTop: isMobile ? '16px' : '22px',
-              background: 'linear-gradient(140deg, rgba(15,0,26,0.85), rgba(5,0,12,0.65))',
+              background: 'linear-gradient(150deg, rgba(16,0,0,0.9), rgba(60,0,12,0.65))',
               border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
               borderRadius: '18px',
               padding: '0.3em 1.1em',
@@ -525,8 +530,8 @@ function GameEngine({ modeKey, enabledMoves }) {
         background: DUNGEON_THEME.background,
         color: '#fce9ff',
         fontFamily: '"Cinzel", "Playfair Display", serif',
-        textShadow: '0 2px 12px #000, 0 0 2px #b5179e',
-        padding: isMobile ? '36px 16px 100px' : '60px 5vw 120px',
+        textShadow: '0 2px 12px #000, 0 0 3px #e50914',
+        padding: layoutPadding,
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -584,29 +589,29 @@ function GameEngine({ modeKey, enabledMoves }) {
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: isMobile ? '12px' : '18px',
+            gap: isMobile ? '10px' : '18px',
             alignItems: isMobile ? 'flex-start' : 'center',
             marginBottom: isMobile ? '20px' : '32px',
-            background: DUNGEON_THEME.softPanel,
+            background: 'linear-gradient(150deg, rgba(8,0,0,0.95), rgba(48,0,8,0.7))',
             borderRadius: 28,
-            padding: isMobile ? '16px' : '18px 28px',
+            padding: isMobile ? '14px 16px' : '18px 28px',
             border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
-            boxShadow: '0 30px 60px rgba(0,0,0,0.35)',
+            boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
           }}
         >
-          <div style={{ fontSize: isMobile ? '1.8em' : '2.4em', fontWeight: 700, letterSpacing: '0.08em' }}>{mode.name}</div>
-          <div style={{ fontSize: isMobile ? '1em' : '1.2em', letterSpacing: '0.2em', textTransform: 'uppercase', color: DUNGEON_THEME.textMuted }}>
+          <div style={{ fontSize: isMobile ? '1.6em' : '2.4em', fontWeight: 700, letterSpacing: '0.06em' }}>{mode.name}</div>
+          <div style={{ fontSize: isMobile ? '0.95em' : '1.15em', letterSpacing: '0.18em', textTransform: 'uppercase', color: DUNGEON_THEME.textMuted }}>
             Round {round}
           </div>
           {showTimerBox && (
             <div
               style={{
                 marginLeft: isMobile ? 0 : 'auto',
-                fontSize: isMobile ? '1.05em' : '1.3em',
+                fontSize: isMobile ? '1em' : '1.25em',
                 border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
                 borderRadius: 18,
-                padding: isMobile ? '0.35em 1em' : '0.45em 1.4em',
-                background: 'linear-gradient(120deg, rgba(255,45,149,0.18), rgba(100,108,255,0.18))',
+                padding: isMobile ? '0.4em 0.9em' : '0.5em 1.4em',
+                background: 'linear-gradient(120deg, rgba(229,9,20,0.25), rgba(90,0,0,0.8))',
                 width: isMobile ? '100%' : 'auto',
                 textAlign: 'center',
                 boxShadow: DUNGEON_THEME.glowPrimary,
@@ -617,7 +622,7 @@ function GameEngine({ modeKey, enabledMoves }) {
           )}
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px' : '18px', marginBottom: isMobile ? '24px' : '30px', flexDirection: isMobile ? 'column' : 'row' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px' : '18px', marginBottom: isMobile ? '24px' : '30px', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
           <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderPrimary}` }}>
             <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Scoreboard</div>
             <div style={{ fontSize: '1.45em' }}>Wayne {score.Wayne} &bull; Cindy {score.Cindy}</div>
@@ -632,7 +637,7 @@ function GameEngine({ modeKey, enabledMoves }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px', marginBottom: isMobile ? '24px' : '34px' }}>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px', marginBottom: isMobile ? '24px' : '34px' }}>
           {players.map(player => {
             const maxHp = player.data.maxHp || 100;
             const hpPercent = Math.max(0, Math.round((player.data.hp / maxHp) * 100));
@@ -742,10 +747,10 @@ function GameEngine({ modeKey, enabledMoves }) {
                 border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
                 background: actionDisabled
                   ? 'rgba(255,255,255,0.08)'
-                  : 'linear-gradient(120deg, #ff2d95 0%, #6419ff 100%)',
+                  : 'linear-gradient(120deg, #e50914 0%, #3f0005 100%)',
                 color: '#fff',
                 cursor: actionDisabled ? 'not-allowed' : 'pointer',
-                boxShadow: actionDisabled ? 'none' : '0 25px 55px rgba(255,45,149,0.35)',
+                boxShadow: actionDisabled ? 'none' : '0 25px 55px rgba(229,9,20,0.38)',
               }}
             >
               {submitted ? 'Resolving...' : 'Execute Move'}
@@ -756,7 +761,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               style={{
                 ...primaryButtonBase,
                 border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
-                background: 'rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.06)',
                 color: '#fff',
                 cursor: submitted || showCoinFlip ? 'not-allowed' : 'pointer',
                 boxShadow: '0 15px 35px rgba(0,0,0,0.35)',
@@ -773,11 +778,11 @@ function GameEngine({ modeKey, enabledMoves }) {
                 })}
                 style={{
                   ...primaryButtonBase,
-                  border: '1px solid rgba(100,108,255,0.5)',
-                  background: 'linear-gradient(120deg, rgba(100,108,255,0.3), rgba(159,60,227,0.25))',
+                  border: '1px solid rgba(255,77,109,0.4)',
+                  background: 'linear-gradient(120deg, rgba(255,77,109,0.28), rgba(111,0,8,0.35))',
                   color: '#fff',
                   cursor: 'pointer',
-                  boxShadow: '0 20px 45px rgba(100,108,255,0.35)',
+                  boxShadow: '0 20px 45px rgba(255,77,109,0.25)',
                 }}
               >
                 View Move Art
@@ -792,7 +797,7 @@ function GameEngine({ modeKey, enabledMoves }) {
 
         <div
           style={{
-            background: DUNGEON_THEME.softPanel,
+            background: 'linear-gradient(150deg, rgba(8,0,0,0.88), rgba(36,0,8,0.72))',
             borderRadius: 24,
             padding: isMobile ? '18px' : '24px',
             border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
@@ -813,7 +818,7 @@ function GameEngine({ modeKey, enabledMoves }) {
         {modeKey === 'suddendeath' && finalStand && (
           <div
             style={{
-              background: 'linear-gradient(160deg, rgba(30,0,38,0.9), rgba(6,0,14,0.8))',
+              background: 'linear-gradient(160deg, rgba(24,0,0,0.92), rgba(58,0,8,0.78))',
               borderRadius: 26,
               padding: isMobile ? '18px' : '26px',
               border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
@@ -868,7 +873,7 @@ function GameEngine({ modeKey, enabledMoves }) {
         >
           <div
             style={{
-              background: 'linear-gradient(150deg, rgba(18,0,30,0.95), rgba(4,0,8,0.9))',
+              background: 'linear-gradient(150deg, rgba(12,0,0,0.95), rgba(34,0,6,0.88))',
               color: '#fce9ff',
               padding: isMobile ? '18px' : '24px',
               borderRadius: 22,
@@ -897,12 +902,12 @@ function GameEngine({ modeKey, enabledMoves }) {
                 padding: '0.55em 1.6em',
                 borderRadius: 14,
                 border: 'none',
-                background: 'linear-gradient(120deg, #ff2d95, #9f3ce3)',
+                background: 'linear-gradient(120deg, #e50914, #7c0505)',
                 color: '#fff',
                 cursor: 'pointer',
                 fontWeight: 600,
                 width: isMobile ? '100%' : 'auto',
-                boxShadow: '0 18px 30px rgba(255,45,149,0.35)',
+                boxShadow: '0 18px 30px rgba(229,9,20,0.35)',
               }}
             >
               Close
