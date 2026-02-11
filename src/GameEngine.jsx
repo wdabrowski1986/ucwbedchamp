@@ -50,6 +50,22 @@ const MOVES = [
   { name: 'THE CRUCIBLE', type: 'Finisher', damage: 100, cost: 0, accuracy: 100, special: 'Impactful striking pin (Sudden Death)', character: 'Wayne' },
 ];
 
+const DUNGEON_THEME = {
+  background: 'radial-gradient(circle at 20% -10%, #3c0018 0%, #08000c 55%, #010104 100%)',
+  velvetGlow: 'radial-gradient(circle, rgba(255, 0, 128, 0.12) 0%, transparent 40%)',
+  lattice: 'repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 80px)',
+  panel: 'linear-gradient(160deg, rgba(8,0,18,0.92) 0%, rgba(5,0,10,0.78) 100%)',
+  softPanel: 'linear-gradient(150deg, rgba(18,0,30,0.85), rgba(6,0,14,0.65))',
+  borderPrimary: 'rgba(255, 45, 149, 0.55)',
+  borderSecondary: 'rgba(135, 58, 160, 0.55)',
+  glowPrimary: '0 0 28px rgba(255, 45, 149, 0.35)',
+  glowSecondary: '0 0 20px rgba(100, 108, 255, 0.35)',
+  neonPink: '#ff2d95',
+  neonViolet: '#9f3ce3',
+  ember: '#ffb347',
+  textMuted: '#c8a5d4',
+};
+
 // ...existing code...
 
 function getClothingLayer(hp) {
@@ -288,27 +304,53 @@ function GameEngine({ modeKey, enabledMoves }) {
     ? `${attackerPool.length} move${attackerPool.length === 1 ? '' : 's'} available for ${attacker}`
     : 'No eligible moves for current attacker.';
   const actionDisabled = submitted || !move || showCoinFlip;
+  const statCardStyle = {
+    flex: isMobile ? '1 1 100%' : '1 1 260px',
+    background: DUNGEON_THEME.panel,
+    borderRadius: 24,
+    padding: isMobile ? '17px 18px' : '20px 22px',
+    border: '1px solid rgba(255,255,255,0.08)',
+    boxShadow: '0 30px 55px rgba(0,0,0,0.45)',
+  };
+  const playerCardBase = {
+    background: 'linear-gradient(165deg, rgba(8,0,18,0.95), rgba(2,0,8,0.75))',
+    borderRadius: 28,
+    padding: isMobile ? '20px' : '24px',
+    boxShadow: '0 40px 70px rgba(0,0,0,0.55)',
+    position: 'relative',
+    overflow: 'hidden',
+  };
+  const primaryButtonBase = {
+    flex: '0 0 auto',
+    fontSize: '1.05em',
+    padding: '0.75em 2.4em',
+    borderRadius: 18,
+    fontWeight: 700,
+    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+    width: isMobile ? '100%' : 'auto',
+  };
 
   // Erotic Fight Mode: Only show special UI
   if (modeKey === 'eroticfight') {
     const eroticButtonBase = {
-      fontSize: isMobile ? '1.6em' : '2.7em',
-      padding: isMobile ? '0.9em 1.4em' : '1.1em 2.7em',
-      borderRadius: isMobile ? '18px' : '22px',
+      fontSize: isMobile ? '1.6em' : '2.6em',
+      padding: isMobile ? '0.85em 1.2em' : '1em 2.4em',
+      borderRadius: isMobile ? '20px' : '26px',
       color: '#fff',
       cursor: 'pointer',
       fontWeight: 'bold',
-      boxShadow: '0 0 32px #ff007f99, 0 0 8px #000',
+      boxShadow: '0 25px 60px rgba(0,0,0,0.6), 0 0 35px rgba(255,45,149,0.35)',
       textShadow: '0 2px 8px #000',
-      transition: 'transform 0.1s',
+      transition: 'transform 0.1s, box-shadow 0.2s',
       width: isMobile ? '100%' : 'auto',
       maxWidth: isMobile ? '360px' : 'none',
+      border: '1px solid rgba(255,255,255,0.08)',
     };
     return (
       <div
         style={{
           minHeight: '100vh',
-          background: 'radial-gradient(ellipse at top, #2d002d 0%, #0a001a 100%)',
+          background: DUNGEON_THEME.background,
           color: '#f7e1ff',
           fontFamily: '"Cinzel", "Playfair Display", serif',
           textShadow: '0 2px 12px #000, 0 0 2px #b5179e',
@@ -316,123 +358,161 @@ function GameEngine({ modeKey, enabledMoves }) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: isMobile ? 'flex-start' : 'center',
-          padding: isMobile ? '32px 16px 72px' : '0',
+          padding: isMobile ? '36px 16px 72px' : '60px 0 80px',
           margin: '0',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <div style={{
-          fontSize: isMobile ? '2.4em' : '3.2em',
-          fontWeight: 'bold',
-          color: '#ff007f',
-          letterSpacing: '0.08em',
-          marginBottom: isMobile ? '22px' : '30px',
-          textShadow: '0 0 16px #b5179e, 0 0 8px #000',
-          borderBottom: '2px solid #ff007f',
-          paddingBottom: '0.2em',
-          width: '100%',
-          maxWidth: '600px',
-        }}>
-          <span style={{ fontFamily: '"UnifrakturCook", "Cinzel", serif' }}>Drain Each Other</span>
-        </div>
-        <div style={{
-          fontSize: isMobile ? '1.8em' : '2.7em',
-          color: '#fff',
-          background: 'rgba(30,0,40,0.7)',
-          border: '2px solid #b5179e',
-          borderRadius: '18px',
-          boxShadow: '0 0 24px #b5179e55',
-          padding: isMobile ? '0.25em 1em' : '0.3em 1.5em',
-          marginBottom: isMobile ? '28px' : '38px',
-          fontWeight: 700,
-          letterSpacing: '0.04em',
-          width: isMobile ? '100%' : 'auto',
-        }}>
-          <span style={{ color: '#ff007f', fontWeight: 900 }}>Timer:</span> {formatTime(timer)}
-        </div>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: isMobile ? '18px' : '80px',
-          marginBottom: isMobile ? '28px' : '38px',
-          flexDirection: isMobile ? 'column' : 'row',
-          width: '100%',
-          maxWidth: '700px',
-        }}>
-          <button
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: DUNGEON_THEME.velvetGlow,
+            opacity: 0.4,
+            filter: 'blur(70px)',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: DUNGEON_THEME.lattice,
+            opacity: 0.18,
+            pointerEvents: 'none',
+            mixBlendMode: 'screen',
+          }}
+        />
+        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '760px' }}>
+          <div
             style={{
-              ...eroticButtonBase,
-              background: 'linear-gradient(120deg, #ff007f 0%, #2d002d 100%)',
-              border: '3px solid #b5179e',
-            }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            onClick={() => {
-              setScore(s => ({ ...s, Wayne: s.Wayne + 1 }));
-              setOrgasms(o => ({ ...o, Cindy: o.Cindy + 1 }));
+              fontSize: isMobile ? '2.4em' : '3.3em',
+              fontWeight: 'bold',
+              color: DUNGEON_THEME.neonPink,
+              letterSpacing: '0.12em',
+              marginBottom: isMobile ? '24px' : '32px',
+              textShadow: '0 0 26px rgba(255,0,128,0.7), 0 0 12px #000',
+              borderBottom: `2px solid ${DUNGEON_THEME.borderPrimary}`,
+              paddingBottom: '0.2em',
+              width: '100%',
+              maxWidth: '640px',
+              textAlign: 'center',
             }}
           >
-            <span style={{ letterSpacing: '0.04em' }}>Wayne +1</span>
-          </button>
-          <button
+            <span style={{ fontFamily: '"UnifrakturCook", "Cinzel", serif' }}>Drain Each Other</span>
+          </div>
+          <div
             style={{
-              ...eroticButtonBase,
-              background: 'linear-gradient(120deg, #b5179e 0%, #0a001a 100%)',
-              border: '3px solid #ff007f',
-            }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            onClick={() => {
-              setScore(s => ({ ...s, Cindy: s.Cindy + 1 }));
-              setOrgasms(o => ({ ...o, Wayne: o.Wayne + 1 }));
+              fontSize: isMobile ? '1.8em' : '2.5em',
+              color: '#fff',
+              background: 'linear-gradient(135deg, rgba(20,0,32,0.92), rgba(6,0,12,0.75))',
+              border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
+              borderRadius: '20px',
+              boxShadow: DUNGEON_THEME.glowPrimary,
+              padding: isMobile ? '0.35em 1em' : '0.4em 1.6em',
+              marginBottom: isMobile ? '28px' : '38px',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              width: isMobile ? '100%' : 'auto',
+              textAlign: 'center',
             }}
           >
-            <span style={{ letterSpacing: '0.04em' }}>Cindy +1</span>
-          </button>
-        </div>
-        <div style={{
-          fontSize: isMobile ? '1.4em' : '2.2em',
-          color: '#fff',
-          fontWeight: 'bold',
-          marginTop: isMobile ? '18px' : '28px',
-          background: 'rgba(30,0,40,0.7)',
-          border: '2px solid #ff007f',
-          borderRadius: '14px',
-          padding: '0.2em 1em',
-          boxShadow: '0 0 16px #ff007f55',
-          width: '100%',
-          maxWidth: '420px',
-        }}>
-          <span style={{ color: '#ff007f', fontWeight: 900 }}>Scoreboard:</span> Wayne {score.Wayne} - Cindy {score.Cindy}
-        </div>
-        <div style={{
-          fontSize: isMobile ? '1.2em' : '1.8em',
-          color: '#ff007f',
-          fontWeight: 'bold',
-          marginTop: isMobile ? '16px' : '22px',
-          background: 'rgba(30,0,40,0.7)',
-          border: '2px solid #b5179e',
-          borderRadius: '14px',
-          padding: '0.2em 1em',
-          boxShadow: '0 0 16px #b5179e55',
-          width: '100%',
-          maxWidth: '420px',
-        }}>
-          <span style={{ color: '#fff', fontWeight: 700 }}>Orgasms:</span> Wayne {orgasms.Wayne} &nbsp;|&nbsp; Cindy {orgasms.Cindy}
-        </div>
-        <div style={{
-          position: isMobile ? 'relative' : 'fixed',
-          bottom: isMobile ? 'unset' : '18px',
-          right: isMobile ? 'unset' : '24px',
-          color: '#b5179e',
-          fontSize: '1.1em',
-          opacity: 0.7,
-          fontFamily: 'monospace',
-          marginTop: isMobile ? '36px' : '0',
-          textAlign: 'center',
-        }}>
-          <span>UCW BedChamp &bull; Erotic Wrestling</span>
+            <span style={{ color: DUNGEON_THEME.neonPink, fontWeight: 900 }}>Timer:</span> {formatTime(timer)}
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: isMobile ? '18px' : '80px',
+              marginBottom: isMobile ? '28px' : '38px',
+              flexDirection: isMobile ? 'column' : 'row',
+              width: '100%',
+              maxWidth: '700px',
+            }}
+          >
+            <button
+              style={{
+                ...eroticButtonBase,
+                background: 'linear-gradient(135deg, #ff2d95 0%, #4b0033 100%)',
+                borderColor: 'rgba(255,45,149,0.5)',
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              onClick={() => {
+                setScore(s => ({ ...s, Wayne: s.Wayne + 1 }));
+                setOrgasms(o => ({ ...o, Cindy: o.Cindy + 1 }));
+              }}
+            >
+              <span style={{ letterSpacing: '0.04em' }}>Wayne +1</span>
+            </button>
+            <button
+              style={{
+                ...eroticButtonBase,
+                background: 'linear-gradient(135deg, #9f3ce3 0%, #0a001a 100%)',
+                borderColor: 'rgba(159,60,227,0.5)',
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              onClick={() => {
+                setScore(s => ({ ...s, Cindy: s.Cindy + 1 }));
+                setOrgasms(o => ({ ...o, Wayne: o.Wayne + 1 }));
+              }}
+            >
+              <span style={{ letterSpacing: '0.04em' }}>Cindy +1</span>
+            </button>
+          </div>
+          <div
+            style={{
+              fontSize: isMobile ? '1.4em' : '2.1em',
+              color: '#fff',
+              fontWeight: 'bold',
+              marginTop: isMobile ? '18px' : '28px',
+              background: 'linear-gradient(140deg, rgba(20,0,34,0.8), rgba(5,0,10,0.6))',
+              border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+              borderRadius: '18px',
+              padding: '0.3em 1.1em',
+              boxShadow: DUNGEON_THEME.glowPrimary,
+              width: '100%',
+              maxWidth: '440px',
+            }}
+          >
+            <span style={{ color: DUNGEON_THEME.neonPink, fontWeight: 900 }}>Scoreboard:</span> Wayne {score.Wayne} - Cindy {score.Cindy}
+          </div>
+          <div
+            style={{
+              fontSize: isMobile ? '1.2em' : '1.8em',
+              color: DUNGEON_THEME.neonPink,
+              fontWeight: 'bold',
+              marginTop: isMobile ? '16px' : '22px',
+              background: 'linear-gradient(140deg, rgba(15,0,26,0.85), rgba(5,0,12,0.65))',
+              border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
+              borderRadius: '18px',
+              padding: '0.3em 1.1em',
+              boxShadow: DUNGEON_THEME.glowSecondary,
+              width: '100%',
+              maxWidth: '440px',
+            }}
+          >
+            <span style={{ color: '#fff', fontWeight: 700 }}>Orgasms:</span> Wayne {orgasms.Wayne} &nbsp;|&nbsp; Cindy {orgasms.Cindy}
+          </div>
+          <div
+            style={{
+              position: isMobile ? 'relative' : 'fixed',
+              bottom: isMobile ? 'unset' : '24px',
+              right: isMobile ? 'unset' : '32px',
+              color: DUNGEON_THEME.textMuted,
+              fontSize: '1.1em',
+              opacity: 0.75,
+              fontFamily: 'monospace',
+              marginTop: isMobile ? '36px' : '0',
+              textAlign: 'center',
+            }}
+          >
+            <span>UCW BedChamp &bull; Erotic Wrestling</span>
+          </div>
         </div>
       </div>
     );
@@ -442,103 +522,117 @@ function GameEngine({ modeKey, enabledMoves }) {
     <div
       style={{
         minHeight: '100vh',
-        background: 'radial-gradient(ellipse at top, #2d002d 0%, #0a001a 100%)',
-        color: '#f7e1ff',
+        background: DUNGEON_THEME.background,
+        color: '#fce9ff',
         fontFamily: '"Cinzel", "Playfair Display", serif',
         textShadow: '0 2px 12px #000, 0 0 2px #b5179e',
-        padding: isMobile ? '32px 16px 72px' : '40px 5vw 80px',
+        padding: isMobile ? '36px 16px 100px' : '60px 5vw 120px',
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: DUNGEON_THEME.velvetGlow,
+          opacity: 0.5,
+          filter: 'blur(85px)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: DUNGEON_THEME.lattice,
+          opacity: 0.2,
+          pointerEvents: 'none',
+          mixBlendMode: 'screen',
+        }}
+      />
       {showCoinFlip && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.85)',
+            background: 'rgba(1,0,8,0.92)',
             zIndex: 15,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            backdropFilter: 'blur(6px)',
           }}
         >
           <div
             style={{
-              background: '#1a001f',
-              border: '2px solid #ff007f',
-              borderRadius: 20,
+              background: 'linear-gradient(145deg, rgba(24,0,42,0.95), rgba(10,0,18,0.85))',
+              border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+              borderRadius: 28,
               padding: isMobile ? '24px 28px' : '32px 48px',
               textAlign: 'center',
-              boxShadow: '0 0 36px #ff007f66',
+              boxShadow: '0 0 45px rgba(255,45,149,0.45)',
             }}
           >
-            <div style={{ fontSize: isMobile ? '1.6em' : '2em', fontWeight: 700, marginBottom: 12 }}>Coin Flip</div>
-            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em' }}>{coinFlipResult} attacks first!</div>
+            <div style={{ fontSize: isMobile ? '1.6em' : '2em', fontWeight: 700, marginBottom: 12, color: '#fff' }}>Coin Flip</div>
+            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', color: DUNGEON_THEME.textMuted }}>{coinFlipResult} attacks first!</div>
           </div>
         </div>
       )}
-      <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '10px' : '16px', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: isMobile ? '20px' : '28px', flexDirection: isMobile ? 'column' : 'row' }}>
-          <div style={{ fontSize: isMobile ? '1.8em' : '2.2em', fontWeight: 700 }}>{mode.name}</div>
-          <div style={{ fontSize: isMobile ? '1em' : '1.15em', letterSpacing: '0.08em' }}>Round {round}</div>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1180px', margin: '0 auto', width: '100%' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: isMobile ? '12px' : '18px',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            marginBottom: isMobile ? '20px' : '32px',
+            background: DUNGEON_THEME.softPanel,
+            borderRadius: 28,
+            padding: isMobile ? '16px' : '18px 28px',
+            border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
+            boxShadow: '0 30px 60px rgba(0,0,0,0.35)',
+          }}
+        >
+          <div style={{ fontSize: isMobile ? '1.8em' : '2.4em', fontWeight: 700, letterSpacing: '0.08em' }}>{mode.name}</div>
+          <div style={{ fontSize: isMobile ? '1em' : '1.2em', letterSpacing: '0.2em', textTransform: 'uppercase', color: DUNGEON_THEME.textMuted }}>
+            Round {round}
+          </div>
           {showTimerBox && (
             <div
               style={{
                 marginLeft: isMobile ? 0 : 'auto',
-                fontSize: isMobile ? '1.1em' : '1.35em',
-                border: '2px solid #ff007f',
-                borderRadius: 14,
-                padding: isMobile ? '0.3em 0.9em' : '0.35em 1.1em',
-                background: 'rgba(10,0,30,0.7)',
+                fontSize: isMobile ? '1.05em' : '1.3em',
+                border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+                borderRadius: 18,
+                padding: isMobile ? '0.35em 1em' : '0.45em 1.4em',
+                background: 'linear-gradient(120deg, rgba(255,45,149,0.18), rgba(100,108,255,0.18))',
                 width: isMobile ? '100%' : 'auto',
-                textAlign: isMobile ? 'left' : 'center',
+                textAlign: 'center',
+                boxShadow: DUNGEON_THEME.glowPrimary,
               }}
             >
-              <span style={{ color: '#ff007f', fontWeight: 700 }}>{timerBoxLabel}:</span> {timerBoxValue}
+              <span style={{ color: DUNGEON_THEME.neonPink, fontWeight: 700 }}>{timerBoxLabel}:</span> {timerBoxValue}
             </div>
           )}
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '14px' : '18px', marginBottom: isMobile ? '22px' : '28px', flexDirection: isMobile ? 'column' : 'row' }}>
-          <div
-            style={{
-              flex: isMobile ? '1 1 100%' : '1 1 260px',
-              background: 'rgba(10,0,30,0.65)',
-              border: '1px solid #ff007f',
-              borderRadius: 18,
-              padding: isMobile ? '16px 18px' : '18px 20px',
-            }}
-          >
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px' : '18px', marginBottom: isMobile ? '24px' : '30px', flexDirection: isMobile ? 'column' : 'row' }}>
+          <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderPrimary}` }}>
             <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Scoreboard</div>
-            <div style={{ fontSize: '1.4em' }}>Wayne {score.Wayne} &bull; Cindy {score.Cindy}</div>
+            <div style={{ fontSize: '1.45em' }}>Wayne {score.Wayne} &bull; Cindy {score.Cindy}</div>
           </div>
-          <div
-            style={{
-              flex: isMobile ? '1 1 100%' : '1 1 260px',
-              background: 'rgba(10,0,30,0.65)',
-              border: '1px solid #b5179e',
-              borderRadius: 18,
-              padding: isMobile ? '16px 18px' : '18px 20px',
-            }}
-          >
+          <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderSecondary}` }}>
             <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Submissions</div>
-            <div style={{ fontSize: '1.4em' }}>Wayne {submissions.Wayne} &bull; Cindy {submissions.Cindy}</div>
+            <div style={{ fontSize: '1.45em' }}>Wayne {submissions.Wayne} &bull; Cindy {submissions.Cindy}</div>
           </div>
-          <div
-            style={{
-              flex: isMobile ? '1 1 100%' : '1 1 260px',
-              background: 'rgba(10,0,30,0.65)',
-              border: '1px solid #646cff',
-              borderRadius: 18,
-              padding: isMobile ? '16px 18px' : '18px 20px',
-            }}
-          >
+          <div style={{ ...statCardStyle, border: '1px solid rgba(100,108,255,0.45)' }}>
             <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Attacker</div>
             <div style={{ fontSize: '1.3em' }}>{attacker}</div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px', marginBottom: isMobile ? '24px' : '30px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px', marginBottom: isMobile ? '24px' : '34px' }}>
           {players.map(player => {
             const maxHp = player.data.maxHp || 100;
             const hpPercent = Math.max(0, Math.round((player.data.hp / maxHp) * 100));
@@ -547,49 +641,62 @@ function GameEngine({ modeKey, enabledMoves }) {
                 key={player.key}
                 style={{
                   flex: isMobile ? '1 1 100%' : '1 1 320px',
-                  width: isMobile ? '100%' : 'auto',
-                  background: 'rgba(8,0,24,0.78)',
-                  padding: isMobile ? '18px' : '22px',
-                  borderRadius: 20,
-                  border: `1px solid ${player.accent}`,
-                  boxShadow: '0 0 24px rgba(0,0,0,0.45)',
+                  width: '100%',
+                  ...playerCardBase,
+                  border: `1px solid ${player.accent}55`,
+                  backdropFilter: 'blur(6px)',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                  <span style={{ fontSize: isMobile ? '1.15em' : '1.35em', fontWeight: 700 }}>{player.key}</span>
-                  <span
-                    style={{
-                      fontSize: isMobile ? '0.85em' : '0.92em',
-                      letterSpacing: '0.08em',
-                      color: attacker === player.key ? '#ff007f' : '#ccc',
-                    }}
-                  >
-                    {attacker === player.key ? 'ATTACKING' : 'DEFENDING'}
-                  </span>
-                </div>
-                <div style={{ height: 16, borderRadius: 999, background: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 10 }}>
-                  <div
-                    style={{
-                      width: `${hpPercent}%`,
-                      height: '100%',
-                      background: player.accent,
-                      transition: 'width 0.35s ease',
-                    }}
-                  />
-                </div>
-                <div style={{ fontSize: '1em', marginBottom: 6 }}>HP {player.data.hp} / {maxHp}</div>
-                <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 6 }}>Stamina {player.data.stamina}</div>
-                <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Submissions {submissions[player.key]}</div>
-                <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Score {score[player.key]}</div>
-                {player.clothing && (
-                  <div style={{ marginTop: 8, fontSize: '0.95em' }}>
-                    <span style={{ fontSize: '1.2em', marginRight: 6 }}>{player.clothing.icon}</span>
-                    {player.clothing.status}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `linear-gradient(130deg, ${player.accent}22, transparent 65%)`,
+                    pointerEvents: 'none',
+                  }}
+                />
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    <span style={{ fontSize: isMobile ? '1.2em' : '1.4em', fontWeight: 700 }}>{player.key}</span>
+                    <span
+                      style={{
+                        fontSize: isMobile ? '0.85em' : '0.95em',
+                        letterSpacing: '0.12em',
+                        color: attacker === player.key ? DUNGEON_THEME.neonPink : DUNGEON_THEME.textMuted,
+                        border: attacker === player.key ? `1px solid ${DUNGEON_THEME.borderPrimary}` : '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: 999,
+                        padding: '0.3em 1.1em',
+                        background: attacker === player.key ? 'rgba(255,45,149,0.08)' : 'rgba(255,255,255,0.04)',
+                      }}
+                    >
+                      {attacker === player.key ? 'ATTACKING' : 'DEFENDING'}
+                    </span>
                   </div>
-                )}
-                {player.key === 'Wayne' && wayneStunned && (
-                  <div style={{ marginTop: 8, fontSize: '0.9em', color: '#ffb347' }}>Wayne is stunned!</div>
-                )}
+                  <div style={{ height: 18, borderRadius: 999, background: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 12 }}>
+                    <div
+                      style={{
+                        width: `${hpPercent}%`,
+                        height: '100%',
+                        background: `linear-gradient(90deg, ${player.accent}, ${player.accent}aa)`,
+                        transition: 'width 0.35s ease',
+                        boxShadow: `0 0 18px ${player.accent}55`,
+                      }}
+                    />
+                  </div>
+                  <div style={{ fontSize: '1em', marginBottom: 6 }}>HP {player.data.hp} / {maxHp}</div>
+                  <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 6 }}>Stamina {player.data.stamina}</div>
+                  <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Submissions {submissions[player.key]}</div>
+                  <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Score {score[player.key]}</div>
+                  {player.clothing && (
+                    <div style={{ marginTop: 8, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>
+                      <span style={{ fontSize: '1.2em', marginRight: 6 }}>{player.clothing.icon}</span>
+                      {player.clothing.status}
+                    </div>
+                  )}
+                  {player.key === 'Wayne' && wayneStunned && (
+                    <div style={{ marginTop: 8, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>Wayne is stunned!</div>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -597,23 +704,24 @@ function GameEngine({ modeKey, enabledMoves }) {
 
         <div
           style={{
-            background: 'rgba(8,0,24,0.78)',
-            borderRadius: 24,
-            padding: isMobile ? '20px' : '28px',
-            border: '1px solid #ff007f',
-            marginBottom: isMobile ? '24px' : '28px',
+            background: DUNGEON_THEME.panel,
+            borderRadius: 26,
+            padding: isMobile ? '22px' : '30px',
+            border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+            marginBottom: isMobile ? '24px' : '32px',
+            boxShadow: '0 45px 80px rgba(0,0,0,0.45)',
           }}
         >
           <div style={{ fontSize: isMobile ? '1.3em' : '1.6em', fontWeight: 700, marginBottom: 12 }}>Current Move</div>
           {move ? (
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: '1.35em', marginBottom: 6 }}>{move.name}</div>
+              <div style={{ fontSize: '1.35em', marginBottom: 6, color: '#fff' }}>{move.name}</div>
               <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>Type: {move.type}</div>
               <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>
                 Damage {move.damage} &bull; Cost {move.cost} &bull; Accuracy {move.accuracy}%
               </div>
               {move.special && (
-                <div style={{ fontSize: '0.95em', color: '#ffe066', marginBottom: 8 }}>Special: {move.special}</div>
+                <div style={{ fontSize: '0.95em', color: DUNGEON_THEME.ember, marginBottom: 8 }}>Special: {move.special}</div>
               )}
               {currentMoveDetails?.description && (
                 <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 8 }}>{currentMoveDetails.description}</div>
@@ -630,19 +738,14 @@ function GameEngine({ modeKey, enabledMoves }) {
               onClick={handleSubmit}
               disabled={actionDisabled}
               style={{
-                flex: '0 0 auto',
-                fontSize: '1.1em',
-                padding: '0.75em 2.2em',
-                borderRadius: 16,
-                border: '3px solid #ff007f',
+                ...primaryButtonBase,
+                border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
                 background: actionDisabled
-                  ? 'rgba(255,255,255,0.15)'
-                  : 'linear-gradient(120deg, #ff007f 0%, #2d002d 90%)',
+                  ? 'rgba(255,255,255,0.08)'
+                  : 'linear-gradient(120deg, #ff2d95 0%, #6419ff 100%)',
                 color: '#fff',
                 cursor: actionDisabled ? 'not-allowed' : 'pointer',
-                fontWeight: 700,
-                textShadow: '0 2px 8px #000',
-                width: isMobile ? '100%' : 'auto',
+                boxShadow: actionDisabled ? 'none' : '0 25px 55px rgba(255,45,149,0.35)',
               }}
             >
               {submitted ? 'Resolving...' : 'Execute Move'}
@@ -651,16 +754,12 @@ function GameEngine({ modeKey, enabledMoves }) {
               onClick={nextTurn}
               disabled={submitted || showCoinFlip}
               style={{
-                flex: '0 0 auto',
-                fontSize: '1.05em',
-                padding: '0.7em 2em',
-                borderRadius: 14,
-                border: '2px solid #b5179e',
+                ...primaryButtonBase,
+                border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
                 background: 'rgba(255,255,255,0.08)',
                 color: '#fff',
                 cursor: submitted || showCoinFlip ? 'not-allowed' : 'pointer',
-                fontWeight: 600,
-                width: isMobile ? '100%' : 'auto',
+                boxShadow: '0 15px 35px rgba(0,0,0,0.35)',
               }}
             >
               Force Next Turn
@@ -673,60 +772,66 @@ function GameEngine({ modeKey, enabledMoves }) {
                   description: currentMoveDetails.description,
                 })}
                 style={{
-                  flex: '0 0 auto',
-                  fontSize: '1.05em',
-                  padding: '0.7em 2em',
-                  borderRadius: 14,
-                  border: '2px solid #646cff',
-                  background: 'rgba(100,108,255,0.15)',
+                  ...primaryButtonBase,
+                  border: '1px solid rgba(100,108,255,0.5)',
+                  background: 'linear-gradient(120deg, rgba(100,108,255,0.3), rgba(159,60,227,0.25))',
                   color: '#fff',
                   cursor: 'pointer',
-                  fontWeight: 600,
-                  width: isMobile ? '100%' : 'auto',
+                  boxShadow: '0 20px 45px rgba(100,108,255,0.35)',
                 }}
               >
                 View Move Art
               </button>
             )}
           </div>
-          <div style={{ marginTop: 14, fontSize: '0.95em', color: '#c9c9ff' }}>{deckSummary}</div>
+          <div style={{ marginTop: 14, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>{deckSummary}</div>
           {moveStatusMessage && move && (
-            <div style={{ marginTop: 6, fontSize: '0.9em', color: '#ffb347' }}>{moveStatusMessage}</div>
+            <div style={{ marginTop: 6, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>{moveStatusMessage}</div>
           )}
         </div>
 
         <div
           style={{
-            background: 'rgba(10,0,30,0.65)',
-            borderRadius: 20,
-            padding: isMobile ? '18px' : '22px',
-            border: '1px solid #646cff',
-            marginBottom: '20px',
+            background: DUNGEON_THEME.softPanel,
+            borderRadius: 24,
+            padding: isMobile ? '18px' : '24px',
+            border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
+            marginBottom: '22px',
             width: '100%',
+            boxShadow: '0 30px 55px rgba(0,0,0,0.4)',
           }}
         >
           <div style={{ fontSize: isMobile ? '1.1em' : '1.25em', fontWeight: 700, marginBottom: 6 }}>Match Log</div>
-          <div style={{ fontSize: '1em', color: message ? '#fff' : '#c9c9ff' }}>
+          <div style={{ fontSize: '1em', color: message ? '#fff' : DUNGEON_THEME.textMuted }}>
             {message || 'Awaiting the next move...'}
           </div>
           {modeKey === 'suddendeath' && finalStand && (
-            <div style={{ marginTop: 10, fontSize: '1em', color: '#ffb347' }}>Final Stand triggered!</div>
+            <div style={{ marginTop: 10, fontSize: '1em', color: DUNGEON_THEME.ember }}>Final Stand triggered!</div>
           )}
         </div>
 
         {modeKey === 'suddendeath' && finalStand && (
-          <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', color: '#ffaaaa', marginTop: '10px', fontWeight: 'bold', textAlign: 'left', width: '100%' }}>
-            Sudden Death Shootout Results:
-            <div style={{ fontSize: '0.9em', color: '#f7e1ff', marginTop: '8px' }}>
+          <div
+            style={{
+              background: 'linear-gradient(160deg, rgba(30,0,38,0.9), rgba(6,0,14,0.8))',
+              borderRadius: 26,
+              padding: isMobile ? '18px' : '26px',
+              border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+              color: '#ffcfdf',
+              boxShadow: '0 35px 65px rgba(0,0,0,0.45)',
+            }}
+          >
+            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout Results</div>
+            <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 4 }}>
               Wayne lasted: {shootoutTurns.Wayne || '-'} seconds
             </div>
-            <div style={{ fontSize: '0.9em', color: '#f7e1ff' }}>
+            <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 10 }}>
               Cindy lasted: {shootoutTurns.Cindy || '-'} seconds
             </div>
-            <div style={{ fontSize: '1em', marginTop: '8px' }}>
+            <div style={{ fontSize: '1em', marginBottom: 14 }}>
               Winner: {suddenDeathWinner === 'Tie' ? 'It’s a tie!' : suddenDeathWinner || 'Pending'}
             </div>
-            <div style={{ marginTop: '18px', fontSize: '0.9em' }}>
+            <div style={{ fontSize: '0.95em' }}>
               Unique Trophy for Winner:
               <div style={{ margin: '10px 0' }}>
                 Choose a reward:
@@ -751,50 +856,53 @@ function GameEngine({ modeKey, enabledMoves }) {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.8)',
+            background: 'rgba(0,0,0,0.85)',
             zIndex: 20,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '20px',
+            backdropFilter: 'blur(4px)',
           }}
           onClick={() => setShowImageModal(null)}
         >
           <div
             style={{
-              background: '#fff',
-              color: '#111',
+              background: 'linear-gradient(150deg, rgba(18,0,30,0.95), rgba(4,0,8,0.9))',
+              color: '#fce9ff',
               padding: isMobile ? '18px' : '24px',
-              borderRadius: 18,
+              borderRadius: 22,
               width: isMobile ? 'min(420px, 92vw)' : 'min(420px, 90vw)',
               textAlign: 'center',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+              boxShadow: '0 20px 55px rgba(0,0,0,0.55)',
+              border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
             }}
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ marginBottom: 12, fontSize: '1.4em' }}>{showImageModal.name}</h3>
+            <h3 style={{ marginBottom: 12, fontSize: '1.4em', color: '#fff' }}>{showImageModal.name}</h3>
             {showImageModal.image && (
               <img
                 src={`/images/${showImageModal.image}`}
                 alt={showImageModal.name}
-                style={{ width: '100%', borderRadius: 12, marginBottom: 12 }}
+                style={{ width: '100%', borderRadius: 14, marginBottom: 12, border: '1px solid rgba(255,255,255,0.1)' }}
               />
             )}
             {showImageModal.description && (
-              <p style={{ fontSize: '0.95em', color: '#333', marginBottom: 16 }}>{showImageModal.description}</p>
+              <p style={{ fontSize: '0.95em', color: DUNGEON_THEME.textMuted, marginBottom: 16 }}>{showImageModal.description}</p>
             )}
             <button
               onClick={() => setShowImageModal(null)}
               style={{
                 fontSize: '1em',
                 padding: '0.55em 1.6em',
-                borderRadius: 12,
+                borderRadius: 14,
                 border: 'none',
-                background: '#ff007f',
+                background: 'linear-gradient(120deg, #ff2d95, #9f3ce3)',
                 color: '#fff',
                 cursor: 'pointer',
                 fontWeight: 600,
                 width: isMobile ? '100%' : 'auto',
+                boxShadow: '0 18px 30px rgba(255,45,149,0.35)',
               }}
             >
               Close

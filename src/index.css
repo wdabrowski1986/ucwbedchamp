@@ -14,8 +14,32 @@ body {
   margin: 0;
   min-height: 100vh;
   width: 100%;
-  background: radial-gradient(ellipse at top, #2d002d 0%, #0a001a 100%);
+  background: radial-gradient(circle at 20% -10%, #320014 0%, #08000e 55%, #010103 100%);
   color: #f7e1ff;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: -15%;
+  background: radial-gradient(circle at 25% 20%, rgba(255, 0, 128, 0.14), transparent 55%),
+    radial-gradient(circle at 75% 80%, rgba(120, 0, 255, 0.12), transparent 55%);
+  filter: blur(60px);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: -2;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 90px);
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: -1;
 }
 
 a {
@@ -23,7 +47,7 @@ a {
   text-decoration: none;
 }
 a:hover {
-  color: #b5179e;
+  color: #ff2d95;
 }
 
 button {
