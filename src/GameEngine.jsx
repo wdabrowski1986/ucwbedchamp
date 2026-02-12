@@ -66,6 +66,105 @@ const DUNGEON_THEME = {
   textMuted: '#d9b2b2',
 };
 
+const VICTORY_TALES = {
+  default: [
+    ({ winner, loser }) => `${winner} presses the crimson belt against ${loser}'s lips and demands a kiss of surrender.`,
+    ({ winner, loser }) => `${winner} straddles the mattress throne while ${loser} massages every aching muscle as tribute.`,
+    ({ winner, loser }) => `${winner} knots ${loser} in satin sheets and collects slow, sweet apologies for every point lost.`,
+    ({ winner, loser }) => `${winner} drapes the belt across bare hips and orders ${loser} to worship every curve in thanks.`,
+    ({ winner, loser }) => `${winner} locks wrists above ${loser}'s head and makes them whisper every round recap into the belt.`,
+    ({ winner, loser }) => `${winner} lounges on the edge of the bed while ${loser} polishes the buckle with lingering kisses.`,
+    ({ winner, loser }) => `${winner} makes ${loser} wear the belt like a collar and purr out a promise for next match.`,
+    ({ winner, loser }) => `${winner} claims the center pillows while ${loser} fans them with silk until the sweat cools.`,
+    ({ winner, loser, scoreLine }) => `${winner} taps the ${scoreLine} scoreboard and tells ${loser} to kiss each glowing digit.`,
+    ({ winner, loser, submissionLine }) => `${winner} makes ${loser} count the ${submissionLine} submission gap on their knees with the belt in their teeth.`,
+  ],
+  modes: {
+    suddendeath: [
+      ({ winner, loser }) => `${winner} keeps ${loser} pinned in that finisher pose long enough to retell every sudden-death beat.`,
+      ({ winner, loser }) => `${loser} is marched around the mattress so ${winner} can display the belt and the final choke-out to the crowd.`,
+    ],
+    ironwoman: [
+      ({ winner, loser }) => `${winner} makes ${loser} count every brutal Iron Woman minute while kissing the belt between numbers.`,
+      ({ winner, loser }) => `${loser} kneels by the clock rubbing tired calves as ${winner} slow-rolls a victory stretch across the sheets.`,
+    ],
+    eroticfight: [
+      ({ winner, loser, scoreLine }) => `${winner} spritzes the scoreboard (${scoreLine}) with champagne while ${loser} licks every bubble as repayment.`,
+      ({ winner, loser }) => `${loser} recites the orgasm tally like a prayer while ${winner} lounges across the pillows with the belt.`,
+    ],
+    quick: [
+      ({ winner, loser }) => `${winner} keeps the belt slung low and orders ${loser} back to starting position for another sprint.`,
+      ({ winner, loser }) => `${loser} grips the posts catching their breath while ${winner} rewinds the stopwatch with a wicked grin.`,
+    ],
+  },
+  finisher: [
+    ({ winner, loser }) => `${winner} eases out of the finishing hold just enough to drag the belt across ${loser}'s goosebumps.`,
+    ({ winner, loser }) => `${loser} is left trembling while ${winner} traces the path of the finisher with the belt's cold buckle.`,
+  ],
+};
+
+const TIE_TALES = [
+  () => 'Both lovers collapse in a knot of limbs — no one owns the bed tonight.',
+  () => 'They throw the belt between them and trade lazy kisses until the sweat dries.',
+  ({ modeKey }) => modeKey === 'ironwoman'
+    ? 'Hours melt away with neither warrior breaking — the clock surrenders instead.'
+    : 'The arena lights dim while they agree the next bout decides everything.',
+];
+
+const WIN_HEADLINES = [
+  ({ winner }) => `${winner} Rules the Bed`,
+  ({ winner }) => `${winner}'s Velvet Reign`,
+  ({ winner }) => `${winner} Claims the Crimson Crown`,
+];
+
+const WIN_SUBHEADINGS = [
+  ({ winner, loser }) => `${winner} claims the scarlet belt while ${loser} submits beneath silk.`,
+  ({ winner, loser, scoreLine }) => `${winner} dominates ${loser} ${scoreLine} and parades the belt over their hips.`,
+  ({ winner, loser, submissionLine }) => `${winner} racks up a ${submissionLine} submission edge, leaving ${loser} breathless in satin cuffs.`,
+];
+
+const TIE_HEADLINES = [
+  () => 'Velvet Deadlock',
+  () => 'Double Knockout',
+  () => 'No Belt Tonight',
+];
+
+const TIE_SUBHEADINGS = [
+  ({ modeKey }) => modeKey === 'ironwoman'
+    ? 'The Iron Woman clock quits before either fighter does.'
+    : 'No belt awarded — both lovers collapse breathless.',
+  () => 'Sweat, silk, and stalemate — rematch required.',
+];
+
+function pickTemplate(templates, context) {
+  if (!Array.isArray(templates) || templates.length === 0) return '';
+  const factory = templates[Math.floor(Math.random() * templates.length)];
+  if (typeof factory === 'function') {
+    return factory(context);
+  }
+  return factory || '';
+}
+
+function pickVictoryTale(context) {
+  const { modeKey, finishingMoveType } = context;
+  const pools = [];
+  if (finishingMoveType === 'Finisher' && VICTORY_TALES.finisher.length) {
+    pools.push(VICTORY_TALES.finisher);
+  }
+  if (VICTORY_TALES.modes[modeKey]?.length) {
+    pools.push(VICTORY_TALES.modes[modeKey]);
+  }
+  if (VICTORY_TALES.default.length) {
+    pools.push(VICTORY_TALES.default);
+  }
+  const combined = pools.flat();
+  if (combined.length === 0) {
+    return `${context.winner} lounges with the belt while ${context.loser} plots a comeback.`;
+  }
+  const lineFactory = combined[Math.floor(Math.random() * combined.length)];
+  return lineFactory(context);
+}
+
 // ...existing code...
 
 function getClothingLayer(hp) {
@@ -74,6 +173,8 @@ function getClothingLayer(hp) {
   }
   return CLOTHING_LAYERS[CLOTHING_LAYERS.length - 1];
 }
+
+const rollAttacker = () => (Math.random() < 0.5 ? 'Wayne' : 'Cindy');
 
 
 function GameEngine({ modeKey, enabledMoves }) {
@@ -95,6 +196,7 @@ function GameEngine({ modeKey, enabledMoves }) {
     // Handle move submission
     function handleSubmit() {
       setSubmitted(true);
+      setLastResolvedMove(move ? { name: move.name, type: move.type } : null);
       // Determine defender
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
       // Apply move damage or healing
@@ -127,7 +229,7 @@ function GameEngine({ modeKey, enabledMoves }) {
       }
       setTimeout(nextTurn, 1200);
     }
-  const [attacker, setAttacker] = useState(() => (Math.random() < 0.5 ? 'Wayne' : 'Cindy'));
+  const [attacker, setAttacker] = useState(rollAttacker);
   const [showCoinFlip, setShowCoinFlip] = useState(true);
   const [coinFlipResult, setCoinFlipResult] = useState(attacker);
   useEffect(() => {
@@ -156,11 +258,48 @@ function GameEngine({ modeKey, enabledMoves }) {
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState('');
   const [submissions, setSubmissions] = useState({ Wayne: 0, Cindy: 0 });
+  const [matchWinner, setMatchWinner] = useState(null);
+  const [victoryQuote, setVictoryQuote] = useState('');
+  const [victoryHeading, setVictoryHeading] = useState('');
+  const [victorySubheading, setVictorySubheading] = useState('');
+  const [lastResolvedMove, setLastResolvedMove] = useState(null);
   const isMobile = useMobile(768);
 
   // Deck system for move selection
   const [moveDeck, setMoveDeck] = useState([]);
   const [usedMoves, setUsedMoves] = useState([]);
+
+  const resetMatch = () => {
+    const freshAttacker = rollAttacker();
+    setAttacker(freshAttacker);
+    setCoinFlipResult(freshAttacker);
+    setShowCoinFlip(true);
+    setShowImageModal(null);
+    setStrikeTimer(0);
+    setRound(1);
+    setTimer(modeKey === 'ironwoman' ? 0 : mode.duration);
+    setIronWomanWinner(null);
+    setWayne({ ...PLAYER_WAYNE });
+    setCindy({ ...PLAYER_CINDY });
+    setMove(null);
+    setFinalStand(false);
+    setShootoutTurns({ Wayne: null, Cindy: null });
+    setShootoutStep(0);
+    setSuddenDeathWinner(null);
+    setScore({ Wayne: 0, Cindy: 0 });
+    setOrgasms({ Wayne: 0, Cindy: 0 });
+    setWayneStunned(false);
+    setSubmitted(false);
+    setMessage('');
+    setSubmissions({ Wayne: 0, Cindy: 0 });
+    setMatchWinner(null);
+    setVictoryQuote('');
+    setVictoryHeading('');
+    setVictorySubheading('');
+    setLastResolvedMove(null);
+    setMoveDeck([]);
+    setUsedMoves([]);
+  };
 
   function buildMoveDeck() {
     // Use only enabled moves and filter by attacker
@@ -252,6 +391,49 @@ function GameEngine({ modeKey, enabledMoves }) {
       setMessage('Final Stand! Player is completely exposed.');
     }
   }, [wayne.hp, cindy.hp, modeKey, finalStand]);
+
+  useEffect(() => {
+    if (matchWinner) return;
+
+    let winner = null;
+    if (wayne.hp <= 0 && cindy.hp <= 0) {
+      winner = 'Tie';
+    } else if (wayne.hp <= 0) {
+      winner = 'Cindy';
+    } else if (cindy.hp <= 0) {
+      winner = 'Wayne';
+    } else if (mode.duration && timer <= 0) {
+      if (wayne.hp === cindy.hp) {
+        winner = 'Tie';
+      } else {
+        winner = wayne.hp > cindy.hp ? 'Wayne' : 'Cindy';
+      }
+    }
+
+    if (winner) {
+      if (winner === 'Tie') {
+        const tieContext = { modeKey };
+        setVictoryHeading(pickTemplate(TIE_HEADLINES, tieContext));
+        setVictorySubheading(pickTemplate(TIE_SUBHEADINGS, tieContext));
+        setVictoryQuote(pickTemplate(TIE_TALES, tieContext));
+      } else {
+        const loser = winner === 'Wayne' ? 'Cindy' : 'Wayne';
+        const finishingMoveType = lastResolvedMove?.type;
+        const context = {
+          winner,
+          loser,
+          modeKey,
+          finishingMoveType,
+          scoreLine: `${score[winner] ?? 0}-${score[loser] ?? 0}`,
+          submissionLine: `${submissions[winner] ?? 0}-${submissions[loser] ?? 0}`,
+        };
+        setVictoryHeading(pickTemplate(WIN_HEADLINES, context));
+        setVictorySubheading(pickTemplate(WIN_SUBHEADINGS, context));
+        setVictoryQuote(pickVictoryTale(context));
+      }
+      setMatchWinner(winner);
+    }
+  }, [wayne.hp, cindy.hp, timer, mode.duration, matchWinner, modeKey, lastResolvedMove, score, submissions]);
   // ...existing code...
   // Iron Woman: clothing removed at 5/10/15 min
   let ironWomanClothing = null;
@@ -303,7 +485,7 @@ function GameEngine({ modeKey, enabledMoves }) {
   const deckSummary = attackerHasConfiguredMoves
     ? `${attackerPool.length} move${attackerPool.length === 1 ? '' : 's'} available for ${attacker}`
     : 'No eligible moves for current attacker.';
-  const actionDisabled = submitted || !move || showCoinFlip;
+  const actionDisabled = submitted || !move || showCoinFlip || Boolean(matchWinner);
   const layoutPadding = isMobile ? '28px 14px 90px' : '60px clamp(32px,6vw,96px) 120px';
   const statCardStyle = {
     flex: isMobile ? '1 1 100%' : '1 1 260px',
@@ -334,6 +516,17 @@ function GameEngine({ modeKey, enabledMoves }) {
     display: 'inline-flex',
     justifyContent: 'center',
   };
+  const victoryLoser = matchWinner === 'Wayne' ? 'Cindy' : matchWinner === 'Cindy' ? 'Wayne' : null;
+  const overlayHeading = victoryHeading || (matchWinner === 'Tie'
+    ? 'Velvet Deadlock'
+    : matchWinner
+      ? `${matchWinner} Rules the Bed`
+      : '');
+  const overlaySubheading = victorySubheading || (matchWinner === 'Tie'
+    ? 'No belt awarded — both lovers collapse breathless.'
+    : matchWinner && victoryLoser
+      ? `${matchWinner} claims the scarlet belt while ${victoryLoser} submits beneath silk.`
+      : '');
 
   // Erotic Fight Mode: Only show special UI
   if (modeKey === 'eroticfight') {
@@ -856,7 +1049,118 @@ function GameEngine({ modeKey, enabledMoves }) {
         )}
       </div>
 
-      {showImageModal && (
+      {matchWinner && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(2,0,6,0.88)',
+            zIndex: 25,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: isMobile ? '20px' : '32px',
+            backdropFilter: 'blur(6px)',
+          }}
+        >
+          <div
+            style={{
+              width: isMobile ? '100%' : 'min(540px, 90vw)',
+              background: 'linear-gradient(160deg, rgba(11,0,13,0.95), rgba(40,0,12,0.85))',
+              borderRadius: 30,
+              border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+              padding: isMobile ? '28px 22px' : '36px 32px',
+              textAlign: 'center',
+              boxShadow: '0 40px 90px rgba(0,0,0,0.65)',
+              position: 'relative',
+              color: '#ffe9ff',
+            }}
+          >
+            <img
+              src="/images/belt.png"
+              alt="Bed Championship Belt"
+              style={{
+                width: isMobile ? '65%' : '320px',
+                maxWidth: '100%',
+                display: 'block',
+                margin: '0 auto 18px',
+                filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.5))',
+              }}
+            />
+            <div style={{ fontSize: isMobile ? '0.95em' : '1.05em', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#ff9fbb', marginBottom: 12 }}>Bed Champion Crowned</div>
+            <div style={{ fontSize: isMobile ? '2em' : '2.6em', fontWeight: 700, marginBottom: 8 }}>{overlayHeading}</div>
+            <div style={{ fontSize: isMobile ? '1.05em' : '1.2em', color: '#ffd6ff', marginBottom: 18 }}>{overlaySubheading}</div>
+            <div style={{ fontSize: '0.95em', color: '#fdd5ff', marginBottom: 20 }}>{victoryQuote}</div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+                fontSize: '0.95em',
+                background: 'rgba(0,0,0,0.25)',
+                borderRadius: 18,
+                padding: '14px 18px',
+                border: '1px solid rgba(255,255,255,0.12)',
+                marginBottom: 24,
+              }}
+            >
+              <div>Wayne HP {Math.max(0, wayne.hp)} • Cindy HP {Math.max(0, cindy.hp)}</div>
+              <div>Submissions — Wayne {submissions.Wayne} / Cindy {submissions.Cindy}</div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? 10 : 16,
+                justifyContent: 'center',
+                width: '100%',
+              }}
+            >
+              <button
+                onClick={resetMatch}
+                style={{
+                  fontSize: isMobile ? '1.05em' : '1.15em',
+                  padding: '0.75em 1.8em',
+                  borderRadius: 18,
+                  border: 'none',
+                  background: 'linear-gradient(120deg, #ff1e56, #7a001d)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 20px 40px rgba(255,30,86,0.35)',
+                  letterSpacing: '0.04em',
+                  flex: '1 1 auto',
+                }}
+              >
+                Rematch
+              </button>
+              <button
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.reload();
+                  }
+                }}
+                style={{
+                  fontSize: isMobile ? '1em' : '1.05em',
+                  padding: '0.7em 1.6em',
+                  borderRadius: 18,
+                  border: '1px solid rgba(255,255,255,0.35)',
+                  background: 'transparent',
+                  color: '#ffe9ff',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 12px 24px rgba(0,0,0,0.4)',
+                  flex: isMobile ? '1 1 auto' : '0 0 auto',
+                }}
+              >
+                Reload App
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!matchWinner && showImageModal && (
         <div
           style={{
             position: 'fixed',

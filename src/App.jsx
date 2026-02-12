@@ -49,7 +49,12 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
     <div
       style={{
         minHeight: '100vh',
-        background: 'radial-gradient(circle at top, #12000f 0%, #050006 45%, #010102 100%)',
+        backgroundColor: '#040004',
+        backgroundImage: 'linear-gradient(180deg, rgba(2,0,8,0.92), rgba(5,0,6,0.85)), url(/images/ring-bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundBlendMode: 'overlay',
         color: '#fef5ff',
         fontFamily: '"Cinzel", "Playfair Display", serif',
         display: 'flex',
@@ -152,11 +157,11 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
                   background: 'rgba(255,255,255,0.02)',
                 }}
               >
-                UCW BedChamp • Couples Arena
+                UCW BedChamp • Bedroom Arena
               </div>
               <div style={{ fontSize: isMobile ? '2.4em' : '3.3em', lineHeight: 1.05, fontWeight: 700 }}>
-                Velvet Arena
-                <span style={{ color: '#ff1e56', display: 'block' }}>Battle Suite</span>
+                Red Velvet Bed Arena
+                <span style={{ color: '#ff1e56', display: 'block' }}>Lover's Gauntlet</span>
               </div>
               <p
                 style={{
@@ -166,7 +171,7 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
                   margin: 0,
                 }}
               >
-                Lace-up theatrics, stamina wagers, and indulgent forfeits designed for couples who mix romance with rivalry.
+                Pillow-raked battleground with sultry penalties and decadent wagers meant for couples ready to perform.
               </p>
               <div
                 style={{
