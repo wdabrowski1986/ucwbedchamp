@@ -195,12 +195,13 @@ function GameEngine({ modeKey, enabledMoves }) {
       }
     // Handle move submission
     function handleSubmit() {
+      if (!move || matchWinner) return;
       setSubmitted(true);
-      setLastResolvedMove(move ? { name: move.name, type: move.type } : null);
+      setLastResolvedMove({ name: move.name, type: move.type });
       // Determine defender
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
       // Apply move damage or healing
-      if (move && typeof move.damage === 'number' && move.damage !== 0) {
+      if (typeof move.damage === 'number' && move.damage !== 0) {
         if (move.damage > 0) {
           // Damage: reduce defender's HP
           if (defender === 'Wayne') {
@@ -218,15 +219,24 @@ function GameEngine({ modeKey, enabledMoves }) {
         }
       }
       // Prevent sensual and strike moves from causing submissions
-      if (move && move.type !== 'Sensual' && move.type !== 'Strike') {
+      if (move.type !== 'Sensual' && move.type !== 'Strike') {
         setSubmissions(sub => ({
           ...sub,
           [attacker]: sub[attacker] + 1
         }));
         setMessage(`${attacker} performed ${move.name} and scored a submission!`);
       } else {
-        setMessage(`${attacker} performed ${move ? move.name : 'a move'} (no submission)`);
+        setMessage(`${attacker} performed ${move.name} (no submission)`);
       }
+      setTimeout(nextTurn, 1200);
+    }
+
+    function handleEscape() {
+      if (!move || matchWinner) return;
+      setSubmitted(true);
+      setLastResolvedMove({ name: move.name, type: move.type });
+      const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
+      setMessage(`${defender} escapes ${move.name} — the belt stays in question!`);
       setTimeout(nextTurn, 1200);
     }
   const [attacker, setAttacker] = useState(rollAttacker);
@@ -308,6 +318,9 @@ function GameEngine({ modeKey, enabledMoves }) {
       filteredMoves = filteredMoves.filter(m => !m.character || m.character === 'Wayne');
     } else if (attacker === 'Cindy') {
       filteredMoves = filteredMoves.filter(m => !m.character || m.character === 'Cindy');
+    }
+    if (modeKey !== 'suddendeath') {
+      filteredMoves = filteredMoves.filter(m => m.type !== 'Finisher');
     }
     // Assign weights: General (Physical/Challenge/Sensual) = 3, Character-specific = 2, Finisher = 1
     let deck = [];
@@ -461,6 +474,7 @@ function GameEngine({ modeKey, enabledMoves }) {
   const deckHasFinisher = moveDeck.some(m => m.type === 'Finisher');
   const deckHasNonSensual = moveDeck.some(m => m.type !== 'Sensual');
   const currentMoveDetails = move ? MOVE_DETAILS[move.name] : null;
+  const moveImageSrc = currentMoveDetails?.image ? `/images/${currentMoveDetails.image}` : null;
   const showTimerBox = modeKey === 'ironwoman' || Boolean(mode.duration);
   const timerBoxLabel = modeKey === 'ironwoman' ? 'Elapsed' : 'Timer';
   const timerBoxValue = showTimerBox
@@ -515,6 +529,17 @@ function GameEngine({ modeKey, enabledMoves }) {
     width: isMobile ? '100%' : 'auto',
     display: 'inline-flex',
     justifyContent: 'center',
+  };
+  const mainGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.1fr) minmax(0, 0.9fr)',
+    gap: isMobile ? '18px' : '26px',
+    alignItems: 'flex-start',
+  };
+  const columnStackStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: isMobile ? '16px' : '22px',
   };
   const victoryLoser = matchWinner === 'Wayne' ? 'Cindy' : matchWinner === 'Cindy' ? 'Wayne' : null;
   const overlayHeading = victoryHeading || (matchWinner === 'Tie'
@@ -784,12 +809,12 @@ function GameEngine({ modeKey, enabledMoves }) {
             flexWrap: 'wrap',
             gap: isMobile ? '10px' : '18px',
             alignItems: isMobile ? 'flex-start' : 'center',
-            marginBottom: isMobile ? '20px' : '32px',
             background: 'linear-gradient(150deg, rgba(8,0,0,0.95), rgba(48,0,8,0.7))',
             borderRadius: 28,
             padding: isMobile ? '14px 16px' : '18px 28px',
             border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
             boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+            marginBottom: isMobile ? '18px' : '26px',
           }}
         >
           <div style={{ fontSize: isMobile ? '1.6em' : '2.4em', fontWeight: 700, letterSpacing: '0.06em' }}>{mode.name}</div>
@@ -815,115 +840,180 @@ function GameEngine({ modeKey, enabledMoves }) {
           )}
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px' : '18px', marginBottom: isMobile ? '24px' : '30px', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
-          <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderPrimary}` }}>
-            <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Scoreboard</div>
-            <div style={{ fontSize: '1.45em' }}>Wayne {score.Wayne} &bull; Cindy {score.Cindy}</div>
-          </div>
-          <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderSecondary}` }}>
-            <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Submissions</div>
-            <div style={{ fontSize: '1.45em' }}>Wayne {submissions.Wayne} &bull; Cindy {submissions.Cindy}</div>
-          </div>
-          <div style={{ ...statCardStyle, border: '1px solid rgba(100,108,255,0.45)' }}>
-            <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Attacker</div>
-            <div style={{ fontSize: '1.3em' }}>{attacker}</div>
-          </div>
-        </div>
+        <div style={mainGridStyle}>
+          <div style={columnStackStyle}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px' : '18px', width: '100%' }}>
+              <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderPrimary}` }}>
+                <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Scoreboard</div>
+                <div style={{ fontSize: '1.45em' }}>Wayne {score.Wayne} &bull; Cindy {score.Cindy}</div>
+              </div>
+              <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderSecondary}` }}>
+                <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Submissions</div>
+                <div style={{ fontSize: '1.45em' }}>Wayne {submissions.Wayne} &bull; Cindy {submissions.Cindy}</div>
+              </div>
+              <div style={{ ...statCardStyle, border: '1px solid rgba(100,108,255,0.45)' }}>
+                <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Attacker</div>
+                <div style={{ fontSize: '1.3em' }}>{attacker}</div>
+              </div>
+            </div>
 
-        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px', marginBottom: isMobile ? '24px' : '34px' }}>
-          {players.map(player => {
-            const maxHp = player.data.maxHp || 100;
-            const hpPercent = Math.max(0, Math.round((player.data.hp / maxHp) * 100));
-            return (
-              <div
-                key={player.key}
-                style={{
-                  flex: isMobile ? '1 1 100%' : '1 1 320px',
-                  width: '100%',
-                  ...playerCardBase,
-                  border: `1px solid ${player.accent}55`,
-                  backdropFilter: 'blur(6px)',
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: `linear-gradient(130deg, ${player.accent}22, transparent 65%)`,
-                    pointerEvents: 'none',
-                  }}
-                />
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                    <span style={{ fontSize: isMobile ? '1.2em' : '1.4em', fontWeight: 700 }}>{player.key}</span>
-                    <span
-                      style={{
-                        fontSize: isMobile ? '0.85em' : '0.95em',
-                        letterSpacing: '0.12em',
-                        color: attacker === player.key ? DUNGEON_THEME.neonPink : DUNGEON_THEME.textMuted,
-                        border: attacker === player.key ? `1px solid ${DUNGEON_THEME.borderPrimary}` : '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: 999,
-                        padding: '0.3em 1.1em',
-                        background: attacker === player.key ? 'rgba(255,45,149,0.08)' : 'rgba(255,255,255,0.04)',
-                      }}
-                    >
-                      {attacker === player.key ? 'ATTACKING' : 'DEFENDING'}
-                    </span>
-                  </div>
-                  <div style={{ height: 18, borderRadius: 999, background: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 12 }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px' }}>
+              {players.map(player => {
+                const maxHp = player.data.maxHp || 100;
+                const hpPercent = Math.max(0, Math.round((player.data.hp / maxHp) * 100));
+                return (
+                  <div
+                    key={player.key}
+                    style={{
+                      flex: isMobile ? '1 1 100%' : '1 1 320px',
+                      width: '100%',
+                      ...playerCardBase,
+                      border: `1px solid ${player.accent}55`,
+                      backdropFilter: 'blur(6px)',
+                    }}
+                  >
                     <div
                       style={{
-                        width: `${hpPercent}%`,
-                        height: '100%',
-                        background: `linear-gradient(90deg, ${player.accent}, ${player.accent}aa)`,
-                        transition: 'width 0.35s ease',
-                        boxShadow: `0 0 18px ${player.accent}55`,
+                        position: 'absolute',
+                        inset: 0,
+                        background: `linear-gradient(130deg, ${player.accent}22, transparent 65%)`,
+                        pointerEvents: 'none',
                       }}
                     />
-                  </div>
-                  <div style={{ fontSize: '1em', marginBottom: 6 }}>HP {player.data.hp} / {maxHp}</div>
-                  <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 6 }}>Stamina {player.data.stamina}</div>
-                  <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Submissions {submissions[player.key]}</div>
-                  <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Score {score[player.key]}</div>
-                  {player.clothing && (
-                    <div style={{ marginTop: 8, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>
-                      <span style={{ fontSize: '1.2em', marginRight: 6 }}>{player.clothing.icon}</span>
-                      {player.clothing.status}
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                        <span style={{ fontSize: isMobile ? '1.2em' : '1.4em', fontWeight: 700 }}>{player.key}</span>
+                        <span
+                          style={{
+                            fontSize: isMobile ? '0.85em' : '0.95em',
+                            letterSpacing: '0.12em',
+                            color: attacker === player.key ? DUNGEON_THEME.neonPink : DUNGEON_THEME.textMuted,
+                            border: attacker === player.key ? `1px solid ${DUNGEON_THEME.borderPrimary}` : '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: 999,
+                            padding: '0.3em 1.1em',
+                            background: attacker === player.key ? 'rgba(255,45,149,0.08)' : 'rgba(255,255,255,0.04)',
+                          }}
+                        >
+                          {attacker === player.key ? 'ATTACKING' : 'DEFENDING'}
+                        </span>
+                      </div>
+                      <div style={{ height: 18, borderRadius: 999, background: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 12 }}>
+                        <div
+                          style={{
+                            width: `${hpPercent}%`,
+                            height: '100%',
+                            background: `linear-gradient(90deg, ${player.accent}, ${player.accent}aa)`,
+                            transition: 'width 0.35s ease',
+                            boxShadow: `0 0 18px ${player.accent}55`,
+                          }}
+                        />
+                      </div>
+                      <div style={{ fontSize: '1em', marginBottom: 6 }}>HP {player.data.hp} / {maxHp}</div>
+                      <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 6 }}>Stamina {player.data.stamina}</div>
+                      <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Submissions {submissions[player.key]}</div>
+                      <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Score {score[player.key]}</div>
+                      {player.clothing && (
+                        <div style={{ marginTop: 8, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>
+                          <span style={{ fontSize: '1.2em', marginRight: 6 }}>{player.clothing.icon}</span>
+                          {player.clothing.status}
+                        </div>
+                      )}
+                      {player.key === 'Wayne' && wayneStunned && (
+                        <div style={{ marginTop: 8, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>Wayne is stunned!</div>
+                      )}
                     </div>
-                  )}
-                  {player.key === 'Wayne' && wayneStunned && (
-                    <div style={{ marginTop: 8, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>Wayne is stunned!</div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-        <div
-          style={{
-            background: DUNGEON_THEME.panel,
-            borderRadius: 26,
-            padding: isMobile ? '22px' : '30px',
-            border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
-            marginBottom: isMobile ? '24px' : '32px',
-            boxShadow: '0 45px 80px rgba(0,0,0,0.45)',
-          }}
-        >
+          <div style={columnStackStyle}>
+            <div
+              style={{
+                background: DUNGEON_THEME.panel,
+                borderRadius: 26,
+                padding: isMobile ? '22px' : '30px',
+                border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+                boxShadow: '0 45px 80px rgba(0,0,0,0.45)',
+              }}
+            >
           <div style={{ fontSize: isMobile ? '1.3em' : '1.6em', fontWeight: 700, marginBottom: 12 }}>Current Move</div>
           {move ? (
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: '1.35em', marginBottom: 6, color: '#fff' }}>{move.name}</div>
-              <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>Type: {move.type}</div>
-              <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>
-                Damage {move.damage} &bull; Cost {move.cost} &bull; Accuracy {move.accuracy}%
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '16px' : '28px',
+                alignItems: 'stretch',
+              }}
+            >
+              <div style={{ textAlign: 'left', flex: '2 1 320px' }}>
+                <div style={{ fontSize: '1.35em', marginBottom: 6, color: '#fff' }}>{move.name}</div>
+                <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>Type: {move.type}</div>
+                <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>
+                  Damage {move.damage} &bull; Cost {move.cost} &bull; Accuracy {move.accuracy}%
+                </div>
+                {move.special && (
+                  <div style={{ fontSize: '0.95em', color: DUNGEON_THEME.ember, marginBottom: 8 }}>Special: {move.special}</div>
+                )}
+                {currentMoveDetails?.description && (
+                  <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 8 }}>{currentMoveDetails.description}</div>
+                )}
               </div>
-              {move.special && (
-                <div style={{ fontSize: '0.95em', color: DUNGEON_THEME.ember, marginBottom: 8 }}>Special: {move.special}</div>
-              )}
-              {currentMoveDetails?.description && (
-                <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 8 }}>{currentMoveDetails.description}</div>
-              )}
+              <div style={{ flex: '1 1 220px' }}>
+                {moveImageSrc ? (
+                  <div
+                    onClick={() => setShowImageModal({
+                      name: move.name,
+                      image: currentMoveDetails.image,
+                      description: currentMoveDetails.description,
+                    })}
+                    style={{
+                      borderRadius: 18,
+                      overflow: 'hidden',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      boxShadow: '0 25px 45px rgba(0,0,0,0.4)',
+                      cursor: 'pointer',
+                      position: 'relative',
+                    }}
+                  >
+                    <img
+                      src={moveImageSrc}
+                      alt={`${move.name} illustration`}
+                      style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        padding: '6px 10px',
+                        background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.65) 100%)',
+                        fontSize: '0.85em',
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Tap to enlarge
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      borderRadius: 18,
+                      border: '1px dashed rgba(255,255,255,0.2)',
+                      padding: '32px 18px',
+                      textAlign: 'center',
+                      color: DUNGEON_THEME.textMuted,
+                      fontSize: '0.95em',
+                    }}
+                  >
+                    Move art coming soon.
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div style={{ fontSize: '1.1em', color: '#f0caff' }}>{moveStatusMessage}</div>
@@ -946,41 +1036,38 @@ function GameEngine({ modeKey, enabledMoves }) {
                 boxShadow: actionDisabled ? 'none' : '0 25px 55px rgba(229,9,20,0.38)',
               }}
             >
-              {submitted ? 'Resolving...' : 'Execute Move'}
+              {submitted ? 'Resolving...' : 'Submit Move'}
+            </button>
+            <button
+              onClick={handleEscape}
+              disabled={actionDisabled}
+              style={{
+                ...primaryButtonBase,
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: actionDisabled
+                  ? 'rgba(255,255,255,0.04)'
+                  : 'linear-gradient(120deg, rgba(255,255,255,0.08), rgba(0,0,0,0.55))',
+                color: '#fff',
+                cursor: actionDisabled ? 'not-allowed' : 'pointer',
+                boxShadow: actionDisabled ? 'none' : '0 15px 35px rgba(0,0,0,0.45)',
+              }}
+            >
+              Escape Move
             </button>
             <button
               onClick={nextTurn}
-              disabled={submitted || showCoinFlip}
+              disabled={submitted || showCoinFlip || Boolean(matchWinner)}
               style={{
                 ...primaryButtonBase,
                 border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
                 background: 'rgba(255,255,255,0.06)',
                 color: '#fff',
-                cursor: submitted || showCoinFlip ? 'not-allowed' : 'pointer',
+                cursor: submitted || showCoinFlip || matchWinner ? 'not-allowed' : 'pointer',
                 boxShadow: '0 15px 35px rgba(0,0,0,0.35)',
               }}
             >
               Force Next Turn
             </button>
-            {currentMoveDetails?.image && move && (
-              <button
-                onClick={() => setShowImageModal({
-                  name: move.name,
-                  image: currentMoveDetails.image,
-                  description: currentMoveDetails.description,
-                })}
-                style={{
-                  ...primaryButtonBase,
-                  border: '1px solid rgba(255,77,109,0.4)',
-                  background: 'linear-gradient(120deg, rgba(255,77,109,0.28), rgba(111,0,8,0.35))',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  boxShadow: '0 20px 45px rgba(255,77,109,0.25)',
-                }}
-              >
-                View Move Art
-              </button>
-            )}
           </div>
           <div style={{ marginTop: 14, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>{deckSummary}</div>
           {moveStatusMessage && move && (
@@ -988,65 +1075,66 @@ function GameEngine({ modeKey, enabledMoves }) {
           )}
         </div>
 
-        <div
-          style={{
-            background: 'linear-gradient(150deg, rgba(8,0,0,0.88), rgba(36,0,8,0.72))',
-            borderRadius: 24,
-            padding: isMobile ? '18px' : '24px',
-            border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
-            marginBottom: '22px',
-            width: '100%',
-            boxShadow: '0 30px 55px rgba(0,0,0,0.4)',
-          }}
-        >
-          <div style={{ fontSize: isMobile ? '1.1em' : '1.25em', fontWeight: 700, marginBottom: 6 }}>Match Log</div>
-          <div style={{ fontSize: '1em', color: message ? '#fff' : DUNGEON_THEME.textMuted }}>
-            {message || 'Awaiting the next move...'}
-          </div>
-          {modeKey === 'suddendeath' && finalStand && (
-            <div style={{ marginTop: 10, fontSize: '1em', color: DUNGEON_THEME.ember }}>Final Stand triggered!</div>
-          )}
-        </div>
-
-        {modeKey === 'suddendeath' && finalStand && (
-          <div
-            style={{
-              background: 'linear-gradient(160deg, rgba(24,0,0,0.92), rgba(58,0,8,0.78))',
-              borderRadius: 26,
-              padding: isMobile ? '18px' : '26px',
-              border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
-              color: '#ffcfdf',
-              boxShadow: '0 35px 65px rgba(0,0,0,0.45)',
-            }}
-          >
-            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout Results</div>
-            <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 4 }}>
-              Wayne lasted: {shootoutTurns.Wayne || '-'} seconds
-            </div>
-            <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 10 }}>
-              Cindy lasted: {shootoutTurns.Cindy || '-'} seconds
-            </div>
-            <div style={{ fontSize: '1em', marginBottom: 14 }}>
-              Winner: {suddenDeathWinner === 'Tie' ? "It's a tie!" : suddenDeathWinner || 'Pending'}
-            </div>
-            <div style={{ fontSize: '0.95em' }}>
-              Unique Trophy for Winner:
-              <div style={{ margin: '10px 0' }}>
-                Choose a reward:
-                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-                  <li>1. Winner gets a legendary victory photo/video with the loser (full creative control)</li>
-                  <li>2. Loser must perform a dramatic entrance or exit for the winner</li>
-                  <li>3. Winner receives a personalized trophy or keepsake (physical or digital)</li>
-                  <li>4. Loser must give tribute to the winner (Winners Choice)</li>
-                  <li>5. Winner can create a new move or rule for future matches</li>
-                  <li>6. Loser must grant the winner a wish (within reason)</li>
-                  <li>7. Winner gets exclusive bragging rights and a special title until next Sudden Death match</li>
-                </ul>
-                <div style={{ fontStyle: 'italic', color: '#f0caff' }}>(Pick your favorite or invent your own!)</div>
+            <div
+              style={{
+                background: 'linear-gradient(150deg, rgba(8,0,0,0.88), rgba(36,0,8,0.72))',
+                borderRadius: 24,
+                padding: isMobile ? '18px' : '24px',
+                border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
+                width: '100%',
+                boxShadow: '0 30px 55px rgba(0,0,0,0.4)',
+              }}
+            >
+              <div style={{ fontSize: isMobile ? '1.1em' : '1.25em', fontWeight: 700, marginBottom: 6 }}>Match Log</div>
+              <div style={{ fontSize: '1em', color: message ? '#fff' : DUNGEON_THEME.textMuted }}>
+                {message || 'Awaiting the next move...'}
               </div>
+              {modeKey === 'suddendeath' && finalStand && (
+                <div style={{ marginTop: 10, fontSize: '1em', color: DUNGEON_THEME.ember }}>Final Stand triggered!</div>
+              )}
             </div>
+
+            {modeKey === 'suddendeath' && finalStand && (
+              <div
+                style={{
+                  background: 'linear-gradient(160deg, rgba(24,0,0,0.92), rgba(58,0,8,0.78))',
+                  borderRadius: 26,
+                  padding: isMobile ? '18px' : '26px',
+                  border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+                  color: '#ffcfdf',
+                  boxShadow: '0 35px 65px rgba(0,0,0,0.45)',
+                }}
+              >
+                <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout Results</div>
+                <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 4 }}>
+                  Wayne lasted: {shootoutTurns.Wayne || '-'} seconds
+                </div>
+                <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 10 }}>
+                  Cindy lasted: {shootoutTurns.Cindy || '-'} seconds
+                </div>
+                <div style={{ fontSize: '1em', marginBottom: 14 }}>
+                  Winner: {suddenDeathWinner === 'Tie' ? "It's a tie!" : suddenDeathWinner || 'Pending'}
+                </div>
+                <div style={{ fontSize: '0.95em' }}>
+                  Unique Trophy for Winner:
+                  <div style={{ margin: '10px 0' }}>
+                    Choose a reward:
+                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                      <li>1. Winner gets a legendary victory photo/video with the loser (full creative control)</li>
+                      <li>2. Loser must perform a dramatic entrance or exit for the winner</li>
+                      <li>3. Winner receives a personalized trophy or keepsake (physical or digital)</li>
+                      <li>4. Loser must give tribute to the winner (Winners Choice)</li>
+                      <li>5. Winner can create a new move or rule for future matches</li>
+                      <li>6. Loser must grant the winner a wish (within reason)</li>
+                      <li>7. Winner gets exclusive bragging rights and a special title until next Sudden Death match</li>
+                    </ul>
+                    <div style={{ fontStyle: 'italic', color: '#f0caff' }}>(Pick your favorite or invent your own!)</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {matchWinner && (
