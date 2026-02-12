@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { PLAYER_WAYNE, PLAYER_CINDY, GAME_MODES, CLOTHING_LAYERS } from './gameData';
 import { MOVE_DETAILS } from './moveDetails';
 import useMobile from './hooks/useMobile';
@@ -20,7 +20,7 @@ const MOVES = [
   { name: 'Suffocation by Curves', type: 'Smother', damage: 35, cost: 30, accuracy: 85, special: 'IRL Challenge (20s)', character: 'Cindy' },
   { name: 'Goddess Scissors', type: 'Challenge', damage: 40, cost: 35, accuracy: 80, special: 'IRL Challenge (15s)', character: 'Cindy' },
   { name: 'Ball Breaker', type: 'Strike', damage: 20, cost: 20, accuracy: 90, special: '', character: 'Cindy' },
-  { name: 'Queen’s Throne', type: 'Smother', damage: 45, cost: 40, accuracy: 75, special: 'IRL Challenge (20s)', character: 'Cindy' },
+  { name: "Queen's Throne", type: 'Smother', damage: 45, cost: 40, accuracy: 75, special: 'IRL Challenge (20s)', character: 'Cindy' },
   // Wayne's Moves
   { name: 'The Stockade', type: 'Challenge', damage: 23, cost: 15, accuracy: 85, special: 'IRL Challenge (20s)', character: 'Wayne' },
   { name: 'Thigh Spread Pin', type: 'Physical', damage: 30, cost: 15, accuracy: 90, special: 'IRL Challenge (20s)', character: 'Wayne' },
@@ -28,7 +28,7 @@ const MOVES = [
   { name: 'Vice Grip', type: 'Strike', damage: 23, cost: 10, accuracy: 90, special: '', character: 'Wayne' },
   { name: 'The Crucifix', type: 'Challenge', damage: 30, cost: 25, accuracy: 80, special: 'IRL Challenge (15s)', character: 'Wayne' },
   { name: 'Atlas Hold', type: 'Physical', damage: 38, cost: 20, accuracy: 85, special: 'IRL Challenge (20s)', character: 'Wayne' },
-  { name: 'The Conqueror’s Claim', type: 'Sensual', damage: -10, cost: 10, accuracy: 95, special: 'Healing', character: 'Wayne' },
+  { name: "The Conqueror's Claim", type: 'Sensual', damage: -10, cost: 10, accuracy: 95, special: 'Healing', character: 'Wayne' },
   // Sensual Relaxation Moves
   { name: 'Deep Kiss', type: 'Sensual', damage: -5, cost: 5, accuracy: 100, special: 'Heal 5 HP, lower cost (60s)' },
   { name: 'The Tease', type: 'Sensual', damage: -5, cost: 5, accuracy: 100, special: 'Heal 5 HP (45s)' },
@@ -175,7 +175,7 @@ function GameEngine({ modeKey, enabledMoves }) {
     filteredMoves.forEach(m => {
       let weight = 1;
       if (m.type === 'Finisher') weight = 1;
-      else if (['Amazon Straddle', 'Sole Worship', 'Suffocation by Curves', 'Goddess Scissors', 'Ball Breaker', 'Queen’s Throne', 'The Stockade', 'Thigh Spread Pin', 'The Lockdown', 'Vice Grip', 'The Crucifix', 'Atlas Hold', 'The Conqueror’s Claim'].includes(m.name)) weight = 2;
+      else if (['Amazon Straddle', 'Sole Worship', 'Suffocation by Curves', 'Goddess Scissors', 'Ball Breaker', "Queen's Throne", 'The Stockade', 'Thigh Spread Pin', 'The Lockdown', 'Vice Grip', 'The Crucifix', 'Atlas Hold', "The Conqueror's Claim"].includes(m.name)) weight = 2;
       else weight = 3;
       for (let i = 0; i < weight; i++) deck.push(m);
     });
@@ -834,7 +834,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               Cindy lasted: {shootoutTurns.Cindy || '-'} seconds
             </div>
             <div style={{ fontSize: '1em', marginBottom: 14 }}>
-              Winner: {suddenDeathWinner === 'Tie' ? 'It’s a tie!' : suddenDeathWinner || 'Pending'}
+              Winner: {suddenDeathWinner === 'Tie' ? "It's a tie!" : suddenDeathWinner || 'Pending'}
             </div>
             <div style={{ fontSize: '0.95em' }}>
               Unique Trophy for Winner:

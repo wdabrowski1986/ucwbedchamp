@@ -7,6 +7,7 @@ import './App.css';
 import GameEngine from './GameEngine.jsx';
 import { MOVE_DETAILS } from './moveDetails';
 import useMobile from './hooks/useMobile';
+import { GAME_MODES } from './gameData';
 
 const ALL_MOVE_NAMES = Object.keys(MOVE_DETAILS);
 
@@ -210,17 +211,157 @@ function MoveSettingsModal({ enabledMoves, setEnabledMoves, onClose }) {
   );
 }
 
+function ModeRulesModal({ modeKey, onConfirm, onCancel }) {
+  const config = GAME_MODES[modeKey];
+  const isMobile = useMobile(768);
+  if (!config) return null;
+
+  const formatDuration = secs => {
+    if (secs === null) return 'No timer';
+    const minutes = Math.floor(secs / 60);
+    const seconds = secs % 60;
+    return seconds ? `${minutes}m ${seconds}s` : `${minutes} min`;
+  };
+
+  const stats = [
+    { label: 'Rounds', value: config.rounds },
+    { label: 'Timer', value: formatDuration(config.duration) },
+    { label: 'Starting HP', value: config.startingHp ? `${config.startingHp} HP` : 'Standard' },
+  ];
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.78)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1500,
+        padding: isMobile ? '16px' : 0,
+      }}
+    >
+      <div
+        style={{
+          background: 'linear-gradient(160deg, #140014, #030008)',
+          color: '#f7e1ff',
+          padding: isMobile ? '24px' : '36px',
+          borderRadius: isMobile ? 16 : 22,
+          width: isMobile ? '92vw' : 'min(520px, 90vw)',
+          boxShadow: '0 25px 55px rgba(0,0,0,0.55)',
+          border: '2px solid #b5179e',
+          textAlign: 'left',
+          position: 'relative',
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            marginBottom: isMobile ? 16 : 20,
+            fontSize: isMobile ? '1.8em' : '2.2em',
+            textAlign: 'center',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {config.name}
+        </h2>
+        <div
+          style={{
+            fontSize: isMobile ? '1.05em' : '1.2em',
+            marginBottom: isMobile ? 18 : 24,
+            color: '#ffd6ff',
+          }}
+        >
+          {config.winCondition}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: isMobile ? 20 : 28 }}>
+          {stats.map(stat => (
+            <div
+              key={stat.label}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: isMobile ? '1em' : '1.1em',
+                padding: '0.4em 0.2em',
+                borderBottom: '1px solid rgba(255,255,255,0.12)',
+              }}
+            >
+              <span style={{ color: '#ff79c6', letterSpacing: '0.03em' }}>{stat.label}</span>
+              <span>{stat.value}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexDirection: isMobile ? 'column' : 'row' }}>
+          <button
+            onClick={onConfirm}
+            style={{
+              flex: 1,
+              fontSize: isMobile ? '1.05em' : '1.15em',
+              padding: isMobile ? '0.7em 1em' : '0.8em 1.2em',
+              borderRadius: 14,
+              border: 'none',
+              background: 'linear-gradient(120deg, #ff007f, #c21807)',
+              color: '#fff',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 12px 24px rgba(255,0,128,0.35)',
+            }}
+          >
+            OK, Start Match
+          </button>
+          <button
+            onClick={onCancel}
+            style={{
+              flex: 1,
+              fontSize: isMobile ? '1.05em' : '1.15em',
+              padding: isMobile ? '0.7em 1em' : '0.8em 1.2em',
+              borderRadius: 14,
+              border: '1px solid rgba(255,255,255,0.3)',
+              background: 'rgba(255,255,255,0.05)',
+              color: '#f7e1ff',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [mode, setMode] = useState(null);
   const [enabledMoves, setEnabledMoves] = useState(() => Object.keys(MOVE_DETAILS));
   const [showMoveSettings, setShowMoveSettings] = useState(false);
+  const [pendingMode, setPendingMode] = useState(null);
+  const [showModeRules, setShowModeRules] = useState(false);
+
+  const handleModeIntent = modeKey => {
+    setPendingMode(modeKey);
+    setShowModeRules(true);
+  };
+
+  const confirmModeSelection = () => {
+    if (!pendingMode) return;
+    setMode(pendingMode);
+    setShowModeRules(false);
+    setPendingMode(null);
+  };
+
+  const cancelModeSelection = () => {
+    setPendingMode(null);
+    setShowModeRules(false);
+  };
 
   return (
     <div>
       {!mode && (
         <>
           <MainMenu
-            onSelectMode={setMode}
+            onSelectMode={handleModeIntent}
             onOpenMoveSettings={() => setShowMoveSettings(true)}
           />
           {showMoveSettings && (
@@ -228,6 +369,13 @@ function App() {
               enabledMoves={enabledMoves}
               setEnabledMoves={setEnabledMoves}
               onClose={() => setShowMoveSettings(false)}
+            />
+          )}
+          {showModeRules && pendingMode && (
+            <ModeRulesModal
+              modeKey={pendingMode}
+              onConfirm={confirmModeSelection}
+              onCancel={cancelModeSelection}
             />
           )}
         </>
