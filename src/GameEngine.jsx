@@ -103,6 +103,34 @@ const VICTORY_TALES = {
   ],
 };
 
+const DAMAGE_MODIFIERS = {
+  default: 0.65,
+  Strike: 0.5,
+  Physical: 0.7,
+  Challenge: 0.75,
+  Smother: 0.8,
+  Sensual: 1,
+  Finisher: 1,
+};
+
+const MODE_DAMAGE_MODIFIERS = {
+  practice: 0.55,
+  quick: 0.85,
+  endurance: 0.9,
+  ironwoman: 0.85,
+  suddendeath: 1,
+};
+
+const SUBMISSION_TYPES = new Set(['Challenge', 'Physical', 'Smother', 'Finisher']);
+
+function getEffectiveDamage(move, modeKey) {
+  if (!move || typeof move.damage !== 'number') return 0;
+  if (move.damage <= 0) return move.damage;
+  const typeMultiplier = DAMAGE_MODIFIERS[move.type] ?? DAMAGE_MODIFIERS.default;
+  const modeMultiplier = MODE_DAMAGE_MODIFIERS[modeKey] ?? 1;
+  return Math.max(1, Math.round(move.damage * typeMultiplier * modeMultiplier));
+}
+
 const TIE_TALES = [
   () => 'Both lovers collapse in a knot of limbs — no one owns the bed tonight.',
   () => 'They throw the belt between them and trade lazy kisses until the sweat dries.',
@@ -198,36 +226,40 @@ function GameEngine({ modeKey, enabledMoves }) {
       if (!move || matchWinner) return;
       setSubmitted(true);
       setLastResolvedMove({ name: move.name, type: move.type });
-      // Determine defender
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
-      // Apply move damage or healing
-      if (typeof move.damage === 'number' && move.damage !== 0) {
-        if (move.damage > 0) {
-          // Damage: reduce defender's HP
-          if (defender === 'Wayne') {
-            setWayne(prev => ({ ...prev, hp: Math.max(0, prev.hp - move.damage) }));
-          } else {
-            setCindy(prev => ({ ...prev, hp: Math.max(0, prev.hp - move.damage) }));
-          }
-        } else if (move.damage < 0) {
-          // Healing: increase attacker's HP
-          if (attacker === 'Wayne') {
-            setWayne(prev => ({ ...prev, hp: Math.min(100, prev.hp - move.damage) }));
-          } else {
-            setCindy(prev => ({ ...prev, hp: Math.min(100, prev.hp - move.damage) }));
-          }
+      const damageValue = typeof move.damage === 'number' ? getEffectiveDamage(move, modeKey) : 0;
+      let damageMessage = '';
+
+      if (damageValue > 0) {
+        if (defender === 'Wayne') {
+          setWayne(prev => ({ ...prev, hp: Math.max(0, prev.hp - damageValue) }));
+        } else {
+          setCindy(prev => ({ ...prev, hp: Math.max(0, prev.hp - damageValue) }));
         }
+        damageMessage = `${attacker} landed ${move.name} for ${damageValue} damage.`;
+      } else if (damageValue < 0) {
+        const healAmount = Math.abs(damageValue);
+        if (attacker === 'Wayne') {
+          setWayne(prev => ({ ...prev, hp: Math.min(prev.maxHp || 100, prev.hp + healAmount) }));
+        } else {
+          setCindy(prev => ({ ...prev, hp: Math.min(prev.maxHp || 100, prev.hp + healAmount) }));
+        }
+        damageMessage = `${attacker} used ${move.name} and restored ${healAmount} HP.`;
       }
-      // Prevent sensual and strike moves from causing submissions
-      if (move.type !== 'Sensual' && move.type !== 'Strike') {
+
+      const causesSubmission = move.type ? SUBMISSION_TYPES.has(move.type) : false;
+      if (causesSubmission) {
         setSubmissions(sub => ({
           ...sub,
-          [attacker]: sub[attacker] + 1
+          [attacker]: sub[attacker] + 1,
         }));
-        setMessage(`${attacker} performed ${move.name} and scored a submission!`);
+        setMessage(damageMessage ? `${attacker} performed ${move.name} and scored a submission! ${damageMessage}` : `${attacker} performed ${move.name} and scored a submission!`);
+      } else if (damageMessage) {
+        setMessage(damageMessage);
       } else {
-        setMessage(`${attacker} performed ${move.name} (no submission)`);
+        setMessage(`${attacker} performed ${move.name}.`);
       }
+
       setTimeout(nextTurn, 1200);
     }
 
