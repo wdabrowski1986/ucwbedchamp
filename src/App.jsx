@@ -11,137 +11,322 @@ import { GAME_MODES } from './gameData';
 
 const ALL_MOVE_NAMES = Object.keys(MOVE_DETAILS);
 
+const MODE_PREVIEWS = [
+  { key: 'quick', title: 'Quick Match', blurb: 'Lightning three-minute duel built for warm-ups.', accent: '#ff4d6d' },
+  { key: 'best3', title: 'Best of 3', blurb: 'Classic trilogy where momentum matters.', accent: '#ffb347' },
+  { key: 'endurance', title: 'Endurance Match', blurb: 'Fifteen-minute attrition war for control freaks.', accent: '#9dffad' },
+  { key: 'ironwoman', title: 'Iron Woman', blurb: 'Clothing stakes escalate at 5/10/15, no excuses.', accent: '#ff89c2' },
+  { key: 'suddendeath', title: 'Sudden Death', blurb: 'Finishers unlocked. First to zero HP falls.', accent: '#fcd34d' },
+  { key: 'practice', title: 'Practice Mode', blurb: 'Sandbox for rehearsing holds without stakes.', accent: '#93c5fd' },
+  { key: 'eroticfight', title: 'Erotic Fight', blurb: 'Fifteen-minute sensual scoring race.', accent: '#ff1e56', featured: true },
+];
+
 function MainMenu({ onSelectMode, onOpenMoveSettings }) {
-  const isMobile = useMobile(768);
-  const buttonStyle = menuBtnStyle(isMobile);
+  const isMobile = useMobile(900);
+
+  const formatDuration = secs => {
+    if (secs === null || typeof secs === 'undefined') return 'No timer';
+    const minutes = Math.floor(secs / 60);
+    return minutes ? `${minutes} min` : `${secs}s`;
+  };
+
+  const modeCards = MODE_PREVIEWS.map(card => {
+    const config = GAME_MODES[card.key] || {};
+    return {
+      ...card,
+      timer: formatDuration(config.duration),
+      rounds: config.rounds ? `${config.rounds} rounds` : 'Single fall',
+      winCondition: config.winCondition,
+    };
+  });
+
+  const heroStats = [
+    { label: 'Signature Moves', value: ALL_MOVE_NAMES.length, detail: 'curated deck ready tonight' },
+    { label: 'Match Types', value: MODE_PREVIEWS.length, detail: 'pick a ritual, set the tone' },
+  ];
 
   return (
     <div
       style={{
         minHeight: '100vh',
-        background: 'radial-gradient(ellipse at top, #2d002d 0%, #0a001a 100%)',
-        color: '#f7e1ff',
+        background: 'radial-gradient(circle at top, #12000f 0%, #050006 45%, #010102 100%)',
+        color: '#fef5ff',
         fontFamily: '"Cinzel", "Playfair Display", serif',
-        textShadow: '0 2px 12px #000, 0 0 2px #b5179e',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: isMobile ? '32px 16px 48px' : '0',
-        margin: '0',
-        textAlign: 'center',
+        padding: isMobile ? '32px 18px 48px' : '60px 5vw',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      <div style={{
-        fontSize: isMobile ? '2.4em' : '3.2em',
-        fontWeight: 'bold',
-        color: '#ff007f',
-        letterSpacing: '0.08em',
-        marginBottom: isMobile ? '20px' : '30px',
-        textShadow: '0 0 16px #b5179e, 0 0 8px #000',
-        borderBottom: '2px solid #ff007f',
-        paddingBottom: '0.2em',
-        width: isMobile ? '100%' : 'min(90vw, 600px)',
-        maxWidth: '600px',
-      }}>
-        <span style={{ fontFamily: '"UnifrakturCook", "Cinzel", serif' }}>Ultimate Couple Wrestling</span>
-      </div>
-      <div style={{
-        fontSize: isMobile ? '1.6em' : '2.1em',
-        color: '#fff',
-        background: 'rgba(30,0,40,0.7)',
-        border: '2px solid #b5179e',
-        borderRadius: '18px',
-        boxShadow: '0 0 24px #b5179e55',
-        padding: isMobile ? '0.25em 1em' : '0.3em 1.5em',
-        marginBottom: isMobile ? '28px' : '38px',
-        fontWeight: 700,
-        letterSpacing: '0.04em',
-        width: isMobile ? '100%' : 'auto',
-      }}>
-        Select Game Mode
-      </div>
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: isMobile ? '16px' : '22px',
-          marginBottom: isMobile ? '28px' : '36px',
+          position: 'absolute',
+          width: '70vw',
+          height: '70vw',
+          background: 'radial-gradient(circle, rgba(255,30,86,0.35), transparent 65%)',
+          top: '-20%',
+          left: '-10%',
+          filter: 'blur(40px)',
+          opacity: 0.75,
+          animation: 'menuAurora 18s ease-in-out infinite',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          width: '50vw',
+          height: '50vw',
+          background: 'radial-gradient(circle, rgba(147,197,253,0.3), transparent 70%)',
+          bottom: '-25%',
+          right: '-5%',
+          filter: 'blur(50px)',
+          opacity: 0.6,
+          animation: 'menuAurora 22s ease-in-out infinite reverse',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'linear-gradient(120deg, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(300deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+          backgroundSize: '120px 120px',
+          opacity: 0.4,
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div
+        style={{
           width: '100%',
-          maxWidth: isMobile ? '420px' : '480px',
+          maxWidth: '1200px',
+          position: 'relative',
         }}
       >
-        <button style={buttonStyle} onClick={() => onSelectMode('quick')}>Quick Match</button>
-        <button style={buttonStyle} onClick={() => onSelectMode('best3')}>Best of 3</button>
-        <button style={buttonStyle} onClick={() => onSelectMode('endurance')}>Endurance Match</button>
-        <button style={buttonStyle} onClick={() => onSelectMode('ironwoman')}>Iron Woman</button>
-        <button style={buttonStyle} onClick={() => onSelectMode('suddendeath')}>Sudden Death</button>
-        <button style={buttonStyle} onClick={() => onSelectMode('practice')}>Practice Mode</button>
-        <button
+        <div
           style={{
-            ...buttonStyle,
-            background: 'linear-gradient(120deg, #ff007f 0%, #2d002d 100%)',
-            border: '3px solid #b5179e',
-          }}
-          onClick={() => onSelectMode('eroticfight')}
-        >
-          Erotic Fight
-        </button>
-      </div>
-      <div style={{ marginTop: isMobile ? '12px' : '20px', width: '100%', maxWidth: isMobile ? '360px' : 'auto' }}>
-        <button
-          onClick={onOpenMoveSettings}
-          style={{
-            fontSize: isMobile ? '1.05em' : '1.3em',
-            padding: isMobile ? '0.7em 1.4em' : '0.8em 2.5em',
-            borderRadius: isMobile ? 10 : 12,
-            background: 'linear-gradient(90deg, #b5179e 0%, #646cff 100%)',
-            color: '#fff',
-            border: 'none',
-            width: '100%',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            boxShadow: '0 4px 16px #b5179e55',
-            letterSpacing: '0.05em',
-            transition: 'background 0.2s',
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr',
+            gap: isMobile ? '24px' : '42px',
+            alignItems: 'stretch',
           }}
         >
-          ⚙️ Move Settings
-        </button>
-      </div>
-      <div style={{
-        position: isMobile ? 'relative' : 'fixed',
-        bottom: isMobile ? 'unset' : '18px',
-        right: isMobile ? 'unset' : '24px',
-        marginTop: isMobile ? '32px' : 0,
-        color: '#b5179e',
-        fontSize: '1.1em',
-        opacity: 0.7,
-        fontFamily: 'monospace',
-      }}>
-        <span>UCW BedChamp &bull; Erotic Wrestling</span>
+          <section
+            style={{
+              background: 'linear-gradient(160deg, rgba(7,0,12,0.92), rgba(34,0,28,0.72))',
+              border: '1px solid rgba(255,30,86,0.55)',
+              borderRadius: 28,
+              padding: isMobile ? '28px 22px' : '38px',
+              boxShadow: '0 40px 85px rgba(0,0,0,0.55)',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'radial-gradient(circle at 20% 20%, rgba(255,91,141,0.18), transparent 55%)',
+                pointerEvents: 'none',
+              }}
+            />
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: isMobile ? 16 : 20,
+              }}
+            >
+              <div
+                style={{
+                  alignSelf: 'flex-start',
+                  fontSize: isMobile ? '0.85em' : '0.95em',
+                  letterSpacing: '0.4em',
+                  textTransform: 'uppercase',
+                  color: '#ff89c2',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: 999,
+                  padding: '0.35em 1.4em',
+                  background: 'rgba(255,255,255,0.02)',
+                }}
+              >
+                UCW BedChamp • Couples Arena
+              </div>
+              <div style={{ fontSize: isMobile ? '2.4em' : '3.3em', lineHeight: 1.05, fontWeight: 700 }}>
+                Velvet Arena
+                <span style={{ color: '#ff1e56', display: 'block' }}>Battle Suite</span>
+              </div>
+              <p
+                style={{
+                  fontSize: isMobile ? '1.05em' : '1.2em',
+                  color: '#f6ddff',
+                  letterSpacing: '0.02em',
+                  margin: 0,
+                }}
+              >
+                Lace-up theatrics, stamina wagers, and indulgent forfeits designed for couples who mix romance with rivalry.
+              </p>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))',
+                  gap: 14,
+                  marginTop: 6,
+                }}
+              >
+                {heroStats.map(stat => (
+                  <div
+                    key={stat.label}
+                    style={{
+                      border: '1px solid rgba(255,255,255,0.18)',
+                      borderRadius: 20,
+                      padding: '18px 20px',
+                      background: 'rgba(0,0,0,0.25)',
+                      backdropFilter: 'blur(6px)',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.85em', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c2a6ff', marginBottom: 6 }}>{stat.label}</div>
+                    <div style={{ fontSize: '2em', fontWeight: 700 }}>{stat.value}</div>
+                    <div style={{ fontSize: '0.95em', color: '#f3d3ff' }}>{stat.detail}</div>
+                  </div>
+                ))}
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: 12,
+                  marginTop: 10,
+                }}
+              >
+                <button
+                  onClick={onOpenMoveSettings}
+                  style={{
+                    flex: isMobile ? 'unset' : 1,
+                    fontSize: isMobile ? '1.05em' : '1.15em',
+                    padding: '0.85em 1.8em',
+                    borderRadius: 18,
+                    border: 'none',
+                    background: 'linear-gradient(120deg, #ff1e56, #9b003c)',
+                    color: '#fff',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 18px 32px rgba(255,30,86,0.35)',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  Tune Move Deck
+                </button>
+                <div
+                  style={{
+                    flex: 1,
+                    borderRadius: 18,
+                    border: '1px dashed rgba(255,255,255,0.25)',
+                    padding: '0.85em 1.4em',
+                    fontSize: '0.95em',
+                    color: '#f8e1ff',
+                    background: 'rgba(255,255,255,0.02)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  Refine your deck before stepping into the velvet pit.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            style={{
+              background: 'linear-gradient(160deg, rgba(6,0,9,0.92), rgba(12,0,18,0.8))',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 28,
+              padding: isMobile ? '26px 22px' : '34px',
+              boxShadow: '0 40px 75px rgba(0,0,0,0.55)',
+            }}
+          >
+            <div style={{ marginBottom: isMobile ? 18 : 24 }}>
+              <div style={{ fontSize: isMobile ? '1em' : '1.1em', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#9aa5ff' }}>Choose your ritual</div>
+              <div style={{ fontSize: isMobile ? '1.8em' : '2.2em', fontWeight: 600 }}>Select a match, acknowledge the rules, then commit.</div>
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                gap: 16,
+              }}
+            >
+              {modeCards.map(card => (
+                <button
+                  key={card.key}
+                  onClick={() => onSelectMode(card.key)}
+                  style={{
+                    border: `1px solid ${card.accent}55`,
+                    borderRadius: 22,
+                    padding: '18px 20px',
+                    background: 'rgba(255,255,255,0.02)',
+                    color: '#fdf5ff',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.35)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                    <span style={{ fontSize: '1.3em', fontWeight: 600 }}>{card.title}</span>
+                    {card.featured && (
+                      <span
+                        style={{
+                          fontSize: '0.75em',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.2em',
+                          color: card.accent,
+                          border: `1px solid ${card.accent}66`,
+                          borderRadius: 999,
+                          padding: '0.18em 0.8em',
+                        }}
+                      >
+                        Featured
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.98em', color: '#d9c8ff' }}>{card.blurb}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9em', color: '#f8e1ff', opacity: 0.8 }}>
+                    <span>Timer: {card.timer}</span>
+                    <span>{card.rounds}</span>
+                  </div>
+                  {card.winCondition && (
+                    <div style={{ fontSize: '0.85em', color: '#bfc2ff', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 8 }}>
+                      {card.winCondition}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+        <div
+          style={{
+            marginTop: isMobile ? 28 : 36,
+            textAlign: 'center',
+            fontSize: '0.95em',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: '#9a8cff',
+          }}
+        >
+          UCW BedChamp • Designed for daring duos
+        </div>
       </div>
     </div>
   );
 }
-// Menu button style for dark erotic theme
-const menuBtnStyle = isMobile => ({
-  fontSize: isMobile ? '1.1em' : '1.5em',
-  padding: isMobile ? '0.65em 1.2em' : '0.7em 2.2em',
-  borderRadius: isMobile ? '14px' : '18px',
-  background: 'linear-gradient(120deg, #b5179e 0%, #0a001a 100%)',
-  color: '#fff',
-  border: '3px solid #ff007f',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  boxShadow: '0 0 24px #b5179e99, 0 0 8px #000',
-  textShadow: '0 2px 8px #000',
-  letterSpacing: '0.04em',
-  margin: 0,
-  width: '100%',
-  maxWidth: '100%',
-  transition: 'transform 0.1s',
-});
 
 
 function MoveSettingsModal({ enabledMoves, setEnabledMoves, onClose }) {
