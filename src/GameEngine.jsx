@@ -351,6 +351,22 @@ function GameEngine({ modeKey, enabledMoves }) {
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
       const attackerName = getRingName(attacker);
       const defenderName = getRingName(defender);
+
+      // Sudden Death Shootout: no HP damage, purely submission-based
+      if (modeKey === 'suddendeath') {
+        setSubmissions(sub => ({ ...sub, [attacker]: sub[attacker] + 1 }));
+        setScore(s => ({ ...s, [attacker]: (s[attacker] ?? 0) + 1 }));
+        if (sdPendingAnswer === null) {
+          setSdPendingAnswer(attacker);
+          postMatchMessage(`${attackerName} locks in ${move.name} and scores! ${defenderName} must answer!`);
+        } else {
+          setSdPendingAnswer(null);
+          postMatchMessage(`${attackerName} answers with ${move.name}! Scores are even — the shootout continues!`);
+        }
+        setTimeout(nextTurn, 1200);
+        return;
+      }
+
       const damageValue = typeof move.damage === 'number' ? getEffectiveDamage(move, modeKey) : 0;
       let damageMessage = '';
 
@@ -410,7 +426,16 @@ function GameEngine({ modeKey, enabledMoves }) {
       }
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
       const defenderName = getRingName(defender);
-        postMatchMessage(`${defenderName} escapes ${move.name} — the worship session will have to wait!`);
+
+      // Sudden Death Shootout: if pending answer and answering player's finisher was escaped, they lose
+      if (modeKey === 'suddendeath' && sdPendingAnswer !== null && sdPendingAnswer !== attacker) {
+        postMatchMessage(`${defenderName} escapes ${move.name}! ${getRingName(sdPendingAnswer)} wins the shootout!`);
+        setSuddenDeathWinner(sdPendingAnswer);
+        setTimeout(nextTurn, 1200);
+        return;
+      }
+
+      postMatchMessage(`${defenderName} escapes ${move.name} — the worship session will have to wait!`);
       setTimeout(nextTurn, 1200);
     }
   const [attacker, setAttacker] = useState(rollAttacker);
@@ -437,6 +462,7 @@ function GameEngine({ modeKey, enabledMoves }) {
   const [shootoutTurns, setShootoutTurns] = useState({ Wayne: null, Cindy: null });
   const [shootoutStep, setShootoutStep] = useState(0);
   const [suddenDeathWinner, setSuddenDeathWinner] = useState(null);
+  const [sdPendingAnswer, setSdPendingAnswer] = useState(null);
   const [score, setScore] = useState({ Wayne: 0, Cindy: 0 });
   const [wayneStunned, setWayneStunned] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -480,6 +506,7 @@ function GameEngine({ modeKey, enabledMoves }) {
     setShootoutTurns({ Wayne: null, Cindy: null });
     setShootoutStep(0);
     setSuddenDeathWinner(null);
+    setSdPendingAnswer(null);
     setScore({ Wayne: 0, Cindy: 0 });
     setOrgasms({ Wayne: 0, Cindy: 0 });
     setWayneStunned(false);
@@ -508,7 +535,7 @@ function GameEngine({ modeKey, enabledMoves }) {
     } else if (attacker === 'Cindy') {
       filteredMoves = filteredMoves.filter(m => !m.character || m.character === 'Cindy');
     }
-    if (modeKey !== 'suddendeath') {
+    if (modeKey !== 'suddendeath' && modeKey !== 'ironwoman') {
       filteredMoves = filteredMoves.filter(m => m.type !== 'Finisher');
     }
     // Assign weights: General (Physical/Challenge/Sensual) = 3, Character-specific = 2, Finisher = 1
@@ -665,7 +692,9 @@ function GameEngine({ modeKey, enabledMoves }) {
     if (matchWinner) return;
 
     let winner = null;
-    if (wayne.hp <= 0 && cindy.hp <= 0) {
+    if (modeKey === 'suddendeath') {
+      if (suddenDeathWinner) winner = suddenDeathWinner;
+    } else if (wayne.hp <= 0 && cindy.hp <= 0) {
       winner = 'Tie';
     } else if (wayne.hp <= 0) {
       winner = 'Cindy';
@@ -744,7 +773,7 @@ function GameEngine({ modeKey, enabledMoves }) {
       }
       setMatchWinner(winner);
     }
-  }, [wayne.hp, cindy.hp, timer, mode.duration, matchWinner, modeKey, lastResolvedMove, score, submissions, coinFlipResult, orgasms]);
+  }, [wayne.hp, cindy.hp, timer, mode.duration, matchWinner, modeKey, lastResolvedMove, score, submissions, coinFlipResult, orgasms, suddenDeathWinner]);
   // ...existing code...
   // Iron Woman: clothing removed at 5/10/15 min
   let ironWomanClothing = null;
@@ -1323,15 +1352,20 @@ function GameEngine({ modeKey, enabledMoves }) {
                     );
                   })}
                 </div>
-                {modeKey === 'suddendeath' && finalStand && (
+                {modeKey === 'suddendeath' && (
                   <div
                     style={{
                       marginTop: 8,
                       fontSize: '0.95em',
-                      color: DUNGEON_THEME.ember,
+                      color: sdPendingAnswer ? DUNGEON_THEME.ember : '#f0caff',
+                      fontWeight: sdPendingAnswer ? 700 : 400,
                     }}
                   >
-                    Final Stand triggered! No more escapes.
+                    {sdPendingAnswer
+                      ? `${getRingName(sdPendingAnswer)} scored! ${getRingName(sdPendingAnswer === 'Wayne' ? 'Cindy' : 'Wayne')} must answer!`
+                      : submissions.Wayne === 0 && submissions.Cindy === 0
+                        ? 'Shootout — first finisher submission starts the challenge.'
+                        : 'Scores are even. Next submission starts a new challenge.'}
                   </div>
                 )}
               </div>
@@ -1498,7 +1532,7 @@ function GameEngine({ modeKey, enabledMoves }) {
           </div>
         </div>
 
-        {modeKey === 'suddendeath' && finalStand && (
+        {modeKey === 'suddendeath' && (
           <div
             style={{
               background: 'linear-gradient(160deg, rgba(24,0,0,0.92), rgba(58,0,8,0.78))',
@@ -1509,31 +1543,24 @@ function GameEngine({ modeKey, enabledMoves }) {
               boxShadow: '0 35px 65px rgba(0,0,0,0.45)',
             }}
           >
-            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout Results</div>
-            <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 4 }}>
-              {getRingName('Wayne')} lasted: {shootoutTurns.Wayne || '-'} seconds
-            </div>
-            <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 10 }}>
-              {getRingName('Cindy')} lasted: {shootoutTurns.Cindy || '-'} seconds
-            </div>
-            <div style={{ fontSize: '1em', marginBottom: 14 }}>
-              Winner: {suddenDeathWinner === 'Tie' ? "It's a tie!" : suddenDeathWinner ? getRingName(suddenDeathWinner) : 'Pending'}
-            </div>
-            <div style={{ fontSize: '0.95em' }}>
-              Unique Trophy for Winner:
-              <div style={{ margin: '10px 0' }}>
-                Choose a reward:
-                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-                  <li>1. Winner gets a legendary victory photo/video with the loser (full creative control)</li>
-                  <li>2. Loser must perform a dramatic entrance or exit for the winner</li>
-                  <li>3. Winner receives a personalized trophy or keepsake (physical or digital)</li>
-                  <li>4. Loser must give tribute to the winner (Winners Choice)</li>
-                  <li>5. Winner can create a new move or rule for future matches</li>
-                  <li>6. Loser must grant the winner a wish (within reason)</li>
-                  <li>7. Winner gets exclusive bragging rights and a special title until next Sudden Death match</li>
-                </ul>
-                <div style={{ fontStyle: 'italic', color: '#f0caff' }}>(Pick your favorite or invent your own!)</div>
+            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 12 }}>
+              <div style={{ fontSize: '1em', color: '#f7e1ff' }}>
+                {getRingName('Wayne')}: {submissions.Wayne} submission{submissions.Wayne !== 1 ? 's' : ''}
               </div>
+              <div style={{ fontSize: '1em', color: '#f7e1ff' }}>
+                {getRingName('Cindy')}: {submissions.Cindy} submission{submissions.Cindy !== 1 ? 's' : ''}
+              </div>
+            </div>
+            <div style={{ fontSize: '1em', marginBottom: 10, color: sdPendingAnswer ? DUNGEON_THEME.ember : '#f0caff', fontWeight: sdPendingAnswer ? 700 : 400 }}>
+              {sdPendingAnswer
+                ? `${getRingName(sdPendingAnswer)} scored! ${getRingName(sdPendingAnswer === 'Wayne' ? 'Cindy' : 'Wayne')} must answer or lose!`
+                : submissions.Wayne === 0 && submissions.Cindy === 0
+                  ? 'Waiting for the first finisher submission...'
+                  : 'Even — next submission starts a new challenge.'}
+            </div>
+            <div style={{ fontSize: '0.9em', color: DUNGEON_THEME.textMuted, fontStyle: 'italic' }}>
+              Land a finisher → opponent must answer with one of their own. Fail to answer? You lose.
             </div>
           </div>
         )}

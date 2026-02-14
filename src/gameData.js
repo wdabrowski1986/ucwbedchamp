@@ -61,8 +61,8 @@ export const GAME_MODES = {
     name: 'Sudden Death',
     duration: null,
     rounds: 1,
-    startingHp: 50,
-    winCondition: 'Opponent reaches 0 HP first',
+    startingHp: 100,
+    winCondition: 'Shootout — land a finisher, opponent must answer or lose',
   },
   practice: {
     name: 'Practice Mode',
