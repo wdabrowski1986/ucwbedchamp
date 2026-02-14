@@ -131,6 +131,136 @@ function getEffectiveDamage(move, modeKey) {
   return Math.max(1, Math.round(move.damage * typeMultiplier * modeMultiplier));
 }
 
+const RING_NAMES = {
+  Wayne: 'The Titan',
+  Cindy: 'The Goddess',
+};
+
+function getRingName(fighter) {
+  return RING_NAMES[fighter] ?? fighter;
+}
+
+const MAX_CLOTHING_LAYER = Math.max(...CLOTHING_LAYERS.map(layer => layer.layer));
+
+function opponentOf(fighter) {
+  return fighter === 'Wayne' ? 'Cindy' : 'Wayne';
+}
+
+function calculateDamageDealt(opponentHp, opponentMaxHp) {
+  const safeMax = typeof opponentMaxHp === 'number' ? opponentMaxHp : 100;
+  const safeHp = Math.max(0, typeof opponentHp === 'number' ? opponentHp : safeMax);
+  return Math.max(0, safeMax - safeHp);
+}
+
+function compareMetric(wayneValue = 0, cindyValue = 0, method = 'Decision', detailFactory) {
+  if (wayneValue === cindyValue) return null;
+  const winner = wayneValue > cindyValue ? 'Wayne' : 'Cindy';
+  const loser = opponentOf(winner);
+  const winnerValue = winner === 'Wayne' ? wayneValue : cindyValue;
+  const loserValue = winner === 'Wayne' ? cindyValue : wayneValue;
+  const detail = typeof detailFactory === 'function'
+    ? detailFactory({ winner, loser, winnerValue, loserValue })
+    : `${getRingName(winner)} edges the ${method.toLowerCase()} ${winnerValue}-${loserValue}.`;
+  return { winner, method, detail };
+}
+
+function compareSubmissionsEdge(state, label = 'Submission Edge') {
+  return compareMetric(
+    state?.submissions?.Wayne ?? 0,
+    state?.submissions?.Cindy ?? 0,
+    label,
+    ({ winner, loser, winnerValue, loserValue }) => `${getRingName(winner)} owns submissions ${winnerValue}-${loserValue} over ${getRingName(loser)}.`
+  );
+}
+
+function compareDamageEdge(state, label = 'Damage Edge') {
+  return compareMetric(
+    state?.damageDealt?.Wayne ?? 0,
+    state?.damageDealt?.Cindy ?? 0,
+    label,
+    ({ winner, loser, winnerValue, loserValue }) => `${getRingName(winner)} dealt ${winnerValue} total damage (vs ${loserValue}).`
+  );
+}
+
+function compareExposureEdge(state) {
+  if (!state?.clothingLayers) return null;
+  const exposureScores = {
+    Wayne: MAX_CLOTHING_LAYER - (state.clothingLayers.Cindy ?? MAX_CLOTHING_LAYER),
+    Cindy: MAX_CLOTHING_LAYER - (state.clothingLayers.Wayne ?? MAX_CLOTHING_LAYER),
+  };
+  return compareMetric(
+    exposureScores.Wayne,
+    exposureScores.Cindy,
+    'Wardrobe Damage',
+    ({ winner, loser, winnerValue, loserValue }) => {
+      const tiers = Math.abs(winnerValue - loserValue);
+      const tierLabel = tiers === 1 ? 'one tier' : `${tiers} tiers`;
+      return `${getRingName(winner)} left ${getRingName(loser)} ${tierLabel} more exposed.`;
+    }
+  );
+}
+
+function suddenDeathResolver(state) {
+  if (state?.lastResolvedMove && state.lastResolvedMove.by && state.lastResolvedMove.resolved !== false) {
+    const winner = state.lastResolvedMove.by;
+    return {
+      winner,
+      method: 'Final Execution',
+      detail: `${getRingName(winner)} sealed it with ${state.lastResolvedMove.name}.`,
+    };
+  }
+  return compareDamageEdge(state, 'Damage Edge');
+}
+
+function practiceResolver(state) {
+  if (!state?.coinFlipResult) return null;
+  const winner = state.coinFlipResult;
+  return {
+    winner,
+    method: 'Coach Coin Toss',
+    detail: `${getRingName(winner)} keeps bragging rights from the opening flip.`,
+  };
+}
+
+function eroticFightResolver(state) {
+  const pleasure = compareMetric(
+    state?.score?.Wayne ?? 0,
+    state?.score?.Cindy ?? 0,
+    'Pleasure Points',
+    ({ winner, loser, winnerValue, loserValue }) => `${getRingName(winner)} piled up ${winnerValue} pleasure points to ${loserValue}.`
+  );
+  if (pleasure) return pleasure;
+  const orgasmPressure = {
+    Wayne: state?.orgasms?.Cindy ?? 0,
+    Cindy: state?.orgasms?.Wayne ?? 0,
+  };
+  return compareMetric(
+    orgasmPressure.Wayne,
+    orgasmPressure.Cindy,
+    'Orgasm Count',
+    ({ winner, loser, winnerValue, loserValue }) => `${getRingName(winner)} pushed ${getRingName(loser)} to ${winnerValue} orgasms (gave up ${loserValue}).`
+  );
+}
+
+const MODE_TIEBREAKERS = {
+  quick: state => compareSubmissionsEdge(state, 'Submission Edge'),
+  best3: state => compareDamageEdge(state, 'Total Damage') || compareSubmissionsEdge(state, 'Submission Edge'),
+  endurance: state => compareDamageEdge(state, 'Attrition Edge') || compareSubmissionsEdge(state, 'Submission Edge'),
+  ironwoman: state => compareExposureEdge(state) || compareSubmissionsEdge(state, 'Submission Edge'),
+  suddendeath: state => suddenDeathResolver(state),
+  practice: state => practiceResolver(state),
+  eroticfight: state => eroticFightResolver(state),
+};
+
+function resolveModeTiebreaker(modeKey, state) {
+  const resolver = MODE_TIEBREAKERS[modeKey];
+  const resolved = resolver ? resolver(state) : null;
+  if (resolved) return resolved;
+  return compareSubmissionsEdge(state, 'Submission Edge')
+    || compareDamageEdge(state, 'Damage Edge')
+    || null;
+}
+
 const TIE_TALES = [
   () => 'Both lovers collapse in a knot of limbs — no one owns the bed tonight.',
   () => 'They throw the belt between them and trade lazy kisses until the sweat dries.',
@@ -225,8 +355,10 @@ function GameEngine({ modeKey, enabledMoves }) {
     function handleSubmit() {
       if (!move || matchWinner) return;
       setSubmitted(true);
-      setLastResolvedMove({ name: move.name, type: move.type });
+      setLastResolvedMove({ name: move.name, type: move.type, by: attacker, resolved: true });
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
+      const attackerName = getRingName(attacker);
+      const defenderName = getRingName(defender);
       const damageValue = typeof move.damage === 'number' ? getEffectiveDamage(move, modeKey) : 0;
       let damageMessage = '';
 
@@ -236,7 +368,7 @@ function GameEngine({ modeKey, enabledMoves }) {
         } else {
           setCindy(prev => ({ ...prev, hp: Math.max(0, prev.hp - damageValue) }));
         }
-        damageMessage = `${attacker} landed ${move.name} for ${damageValue} damage.`;
+        damageMessage = `${attackerName} landed ${move.name} for ${damageValue} damage.`;
       } else if (damageValue < 0) {
         const healAmount = Math.abs(damageValue);
         if (attacker === 'Wayne') {
@@ -244,7 +376,7 @@ function GameEngine({ modeKey, enabledMoves }) {
         } else {
           setCindy(prev => ({ ...prev, hp: Math.min(prev.maxHp || 100, prev.hp + healAmount) }));
         }
-        damageMessage = `${attacker} used ${move.name} and restored ${healAmount} HP.`;
+        damageMessage = `${attackerName} used ${move.name} and restored ${healAmount} HP.`;
       }
 
       const causesSubmission = move.type ? SUBMISSION_TYPES.has(move.type) : false;
@@ -253,11 +385,15 @@ function GameEngine({ modeKey, enabledMoves }) {
           ...sub,
           [attacker]: sub[attacker] + 1,
         }));
-        setMessage(damageMessage ? `${attacker} performed ${move.name} and scored a submission! ${damageMessage}` : `${attacker} performed ${move.name} and scored a submission!`);
+        setMessage(
+          damageMessage
+            ? `${attackerName} performed ${move.name} and scored a submission! ${damageMessage}`
+            : `${attackerName} performed ${move.name} and scored a submission!`
+        );
       } else if (damageMessage) {
         setMessage(damageMessage);
       } else {
-        setMessage(`${attacker} performed ${move.name}.`);
+        setMessage(`${attackerName} performed ${move.name}.`);
       }
 
       setTimeout(nextTurn, 1200);
@@ -266,9 +402,10 @@ function GameEngine({ modeKey, enabledMoves }) {
     function handleEscape() {
       if (!move || matchWinner) return;
       setSubmitted(true);
-      setLastResolvedMove({ name: move.name, type: move.type });
+      setLastResolvedMove({ name: move.name, type: move.type, resolved: false });
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
-      setMessage(`${defender} escapes ${move.name} — the belt stays in question!`);
+      const defenderName = getRingName(defender);
+      setMessage(`${defenderName} escapes ${move.name} — the belt stays in question!`);
       setTimeout(nextTurn, 1200);
     }
   const [attacker, setAttacker] = useState(rollAttacker);
@@ -456,6 +593,29 @@ function GameEngine({ modeKey, enabledMoves }) {
     }
 
     if (winner) {
+      let appliedTiebreaker = null;
+      if (winner === 'Tie') {
+        const tieState = {
+          submissions,
+          score,
+          orgasms,
+          damageDealt: {
+            Wayne: calculateDamageDealt(cindy.hp, cindy.maxHp ?? PLAYER_CINDY.maxHp),
+            Cindy: calculateDamageDealt(wayne.hp, wayne.maxHp ?? PLAYER_WAYNE.maxHp),
+          },
+          clothingLayers: {
+            Wayne: getClothingLayer(wayne.hp)?.layer ?? 0,
+            Cindy: getClothingLayer(cindy.hp)?.layer ?? 0,
+          },
+          coinFlipResult,
+          lastResolvedMove,
+        };
+        appliedTiebreaker = resolveModeTiebreaker(modeKey, tieState);
+        if (appliedTiebreaker?.winner) {
+          winner = appliedTiebreaker.winner;
+        }
+      }
+
       if (winner === 'Tie') {
         const tieContext = { modeKey };
         setVictoryHeading(pickTemplate(TIE_HEADLINES, tieContext));
@@ -463,22 +623,31 @@ function GameEngine({ modeKey, enabledMoves }) {
         setVictoryQuote(pickTemplate(TIE_TALES, tieContext));
       } else {
         const loser = winner === 'Wayne' ? 'Cindy' : 'Wayne';
-        const finishingMoveType = lastResolvedMove?.type;
+        const finishingMoveType = lastResolvedMove?.resolved === false ? undefined : lastResolvedMove?.type;
+        const scoreLine = `${score[winner] ?? 0}-${score[loser] ?? 0}`;
+        const submissionLine = `${submissions[winner] ?? 0}-${submissions[loser] ?? 0}`;
         const context = {
-          winner,
-          loser,
+          winner: getRingName(winner),
+          loser: getRingName(loser),
           modeKey,
           finishingMoveType,
-          scoreLine: `${score[winner] ?? 0}-${score[loser] ?? 0}`,
-          submissionLine: `${submissions[winner] ?? 0}-${submissions[loser] ?? 0}`,
+          scoreLine,
+          submissionLine,
         };
         setVictoryHeading(pickTemplate(WIN_HEADLINES, context));
-        setVictorySubheading(pickTemplate(WIN_SUBHEADINGS, context));
-        setVictoryQuote(pickVictoryTale(context));
+        if (appliedTiebreaker) {
+          setVictorySubheading(`${getRingName(winner)} wins via ${appliedTiebreaker.method}.`);
+          const baseQuote = pickVictoryTale(context);
+          const detail = appliedTiebreaker.detail ? `${appliedTiebreaker.detail} ` : '';
+          setVictoryQuote(`${detail}${baseQuote}`.trim());
+        } else {
+          setVictorySubheading(pickTemplate(WIN_SUBHEADINGS, context));
+          setVictoryQuote(pickVictoryTale(context));
+        }
       }
       setMatchWinner(winner);
     }
-  }, [wayne.hp, cindy.hp, timer, mode.duration, matchWinner, modeKey, lastResolvedMove, score, submissions]);
+  }, [wayne.hp, cindy.hp, timer, mode.duration, matchWinner, modeKey, lastResolvedMove, score, submissions, coinFlipResult, orgasms]);
   // ...existing code...
   // Iron Woman: clothing removed at 5/10/15 min
   let ironWomanClothing = null;
@@ -496,8 +665,8 @@ function GameEngine({ modeKey, enabledMoves }) {
   const wayneClothing = modeKey === 'quick' ? null : modeKey === 'ironwoman' ? ironWomanClothing : getClothingLayer(wayne.hp);
   const cindyClothing = modeKey === 'quick' ? null : modeKey === 'ironwoman' ? ironWomanClothing : getClothingLayer(cindy.hp);
   const players = [
-    { key: 'Wayne', data: wayne, clothing: wayneClothing, accent: '#d62828' },
-    { key: 'Cindy', data: cindy, clothing: cindyClothing, accent: '#ff4d6d' },
+    { key: 'Wayne', label: getRingName('Wayne'), data: wayne, clothing: wayneClothing, accent: '#d62828' },
+    { key: 'Cindy', label: getRingName('Cindy'), data: cindy, clothing: cindyClothing, accent: '#ff4d6d' },
   ];
   const attackerPool = MOVES.filter(
     m => enabledMoves.includes(m.name) && (!m.character || m.character === attacker)
@@ -518,7 +687,7 @@ function GameEngine({ modeKey, enabledMoves }) {
   if (enabledMoves.length === 0) {
     moveStatusMessage = 'All moves are disabled. Enable at least one move in Move Settings.';
   } else if (!attackerHasConfiguredMoves) {
-    moveStatusMessage = `${attacker} has no eligible moves with the current Move Settings.`;
+    moveStatusMessage = `${getRingName(attacker)} has no eligible moves with the current Move Settings.`;
   } else if (modeKey === 'suddendeath' && !deckHasFinisher) {
     moveStatusMessage = 'Sudden Death needs at least one Finisher for the active attacker.';
   } else if (modeKey === 'quick' && !deckHasNonSensual) {
@@ -529,7 +698,7 @@ function GameEngine({ modeKey, enabledMoves }) {
     moveStatusMessage = 'Drawing the next move...';
   }
   const deckSummary = attackerHasConfiguredMoves
-    ? `${attackerPool.length} move${attackerPool.length === 1 ? '' : 's'} available for ${attacker}`
+    ? `${attackerPool.length} move${attackerPool.length === 1 ? '' : 's'} available for ${getRingName(attacker)}`
     : 'No eligible moves for current attacker.';
   const actionDisabled = submitted || !move || showCoinFlip || Boolean(matchWinner);
   const layoutPadding = isMobile ? '28px 14px 90px' : '60px clamp(32px,6vw,96px) 120px';
@@ -574,15 +743,17 @@ function GameEngine({ modeKey, enabledMoves }) {
     gap: isMobile ? '16px' : '22px',
   };
   const victoryLoser = matchWinner === 'Wayne' ? 'Cindy' : matchWinner === 'Cindy' ? 'Wayne' : null;
+  const decoratedWinner = matchWinner && matchWinner !== 'Tie' ? getRingName(matchWinner) : matchWinner;
+  const decoratedLoser = victoryLoser ? getRingName(victoryLoser) : null;
   const overlayHeading = victoryHeading || (matchWinner === 'Tie'
     ? 'Velvet Deadlock'
-    : matchWinner
-      ? `${matchWinner} Rules the Bed`
+    : decoratedWinner
+      ? `${decoratedWinner} Rules the Bed`
       : '');
   const overlaySubheading = victorySubheading || (matchWinner === 'Tie'
     ? 'No belt awarded — both lovers collapse breathless.'
-    : matchWinner && victoryLoser
-      ? `${matchWinner} claims the scarlet belt while ${victoryLoser} submits beneath silk.`
+    : decoratedWinner && decoratedLoser
+      ? `${decoratedWinner} claims the scarlet belt while ${decoratedLoser} submits beneath silk.`
       : '');
 
   // Erotic Fight Mode: Only show special UI
@@ -700,7 +871,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                 setOrgasms(o => ({ ...o, Cindy: o.Cindy + 1 }));
               }}
             >
-              <span style={{ letterSpacing: '0.04em' }}>Wayne +1</span>
+              <span style={{ letterSpacing: '0.04em' }}>{getRingName('Wayne')} +1</span>
             </button>
             <button
               style={{
@@ -716,7 +887,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                 setOrgasms(o => ({ ...o, Wayne: o.Wayne + 1 }));
               }}
             >
-              <span style={{ letterSpacing: '0.04em' }}>Cindy +1</span>
+              <span style={{ letterSpacing: '0.04em' }}>{getRingName('Cindy')} +1</span>
             </button>
           </div>
           <div
@@ -734,7 +905,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               maxWidth: '440px',
             }}
           >
-            <span style={{ color: DUNGEON_THEME.neonPink, fontWeight: 900 }}>Scoreboard:</span> Wayne {score.Wayne} - Cindy {score.Cindy}
+            <span style={{ color: DUNGEON_THEME.neonPink, fontWeight: 900 }}>Scoreboard:</span> {getRingName('Wayne')} {score.Wayne} - {getRingName('Cindy')} {score.Cindy}
           </div>
           <div
             style={{
@@ -751,7 +922,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               maxWidth: '440px',
             }}
           >
-            <span style={{ color: '#fff', fontWeight: 700 }}>Orgasms:</span> Wayne {orgasms.Wayne} &nbsp;|&nbsp; Cindy {orgasms.Cindy}
+            <span style={{ color: '#fff', fontWeight: 700 }}>Orgasms:</span> {getRingName('Wayne')} {orgasms.Wayne} &nbsp;|&nbsp; {getRingName('Cindy')} {orgasms.Cindy}
           </div>
           <div
             style={{
@@ -830,7 +1001,7 @@ function GameEngine({ modeKey, enabledMoves }) {
             }}
           >
             <div style={{ fontSize: isMobile ? '1.6em' : '2em', fontWeight: 700, marginBottom: 12, color: '#fff' }}>Coin Flip</div>
-            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', color: DUNGEON_THEME.textMuted }}>{coinFlipResult} attacks first!</div>
+            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', color: DUNGEON_THEME.textMuted }}>{getRingName(coinFlipResult)} attacks first!</div>
           </div>
         </div>
       )}
@@ -877,15 +1048,15 @@ function GameEngine({ modeKey, enabledMoves }) {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px' : '18px', width: '100%' }}>
               <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderPrimary}` }}>
                 <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Scoreboard</div>
-                <div style={{ fontSize: '1.45em' }}>Wayne {score.Wayne} &bull; Cindy {score.Cindy}</div>
+                <div style={{ fontSize: '1.45em' }}>{getRingName('Wayne')} {score.Wayne} &bull; {getRingName('Cindy')} {score.Cindy}</div>
               </div>
               <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderSecondary}` }}>
                 <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Submissions</div>
-                <div style={{ fontSize: '1.45em' }}>Wayne {submissions.Wayne} &bull; Cindy {submissions.Cindy}</div>
+                <div style={{ fontSize: '1.45em' }}>{getRingName('Wayne')} {submissions.Wayne} &bull; {getRingName('Cindy')} {submissions.Cindy}</div>
               </div>
               <div style={{ ...statCardStyle, border: '1px solid rgba(100,108,255,0.45)' }}>
                 <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Attacker</div>
-                <div style={{ fontSize: '1.3em' }}>{attacker}</div>
+                <div style={{ fontSize: '1.3em' }}>{getRingName(attacker)}</div>
               </div>
             </div>
 
@@ -914,7 +1085,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                     />
                     <div style={{ position: 'relative', zIndex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                        <span style={{ fontSize: isMobile ? '1.2em' : '1.4em', fontWeight: 700 }}>{player.key}</span>
+                        <span style={{ fontSize: isMobile ? '1.2em' : '1.4em', fontWeight: 700 }}>{player.label}</span>
                         <span
                           style={{
                             fontSize: isMobile ? '0.85em' : '0.95em',
@@ -951,7 +1122,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                         </div>
                       )}
                       {player.key === 'Wayne' && wayneStunned && (
-                        <div style={{ marginTop: 8, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>Wayne is stunned!</div>
+                        <div style={{ marginTop: 8, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>{getRingName('Wayne')} is stunned!</div>
                       )}
                     </div>
                   </div>
@@ -1139,13 +1310,13 @@ function GameEngine({ modeKey, enabledMoves }) {
               >
                 <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout Results</div>
                 <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 4 }}>
-                  Wayne lasted: {shootoutTurns.Wayne || '-'} seconds
+                  {getRingName('Wayne')} lasted: {shootoutTurns.Wayne || '-'} seconds
                 </div>
                 <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 10 }}>
-                  Cindy lasted: {shootoutTurns.Cindy || '-'} seconds
+                  {getRingName('Cindy')} lasted: {shootoutTurns.Cindy || '-'} seconds
                 </div>
                 <div style={{ fontSize: '1em', marginBottom: 14 }}>
-                  Winner: {suddenDeathWinner === 'Tie' ? "It's a tie!" : suddenDeathWinner || 'Pending'}
+                  Winner: {suddenDeathWinner === 'Tie' ? "It's a tie!" : suddenDeathWinner ? getRingName(suddenDeathWinner) : 'Pending'}
                 </div>
                 <div style={{ fontSize: '0.95em' }}>
                   Unique Trophy for Winner:
@@ -1224,8 +1395,8 @@ function GameEngine({ modeKey, enabledMoves }) {
                 marginBottom: 24,
               }}
             >
-              <div>Wayne HP {Math.max(0, wayne.hp)} • Cindy HP {Math.max(0, cindy.hp)}</div>
-              <div>Submissions — Wayne {submissions.Wayne} / Cindy {submissions.Cindy}</div>
+              <div>{getRingName('Wayne')} HP {Math.max(0, wayne.hp)} • {getRingName('Cindy')} HP {Math.max(0, cindy.hp)}</div>
+              <div>Submissions — {getRingName('Wayne')} {submissions.Wayne} / {getRingName('Cindy')} {submissions.Cindy}</div>
             </div>
             <div
               style={{

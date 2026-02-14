@@ -1,6 +1,6 @@
 // Player and resource system for Ultimate Couple Wrestling
 export const PLAYER_WAYNE = {
-  name: 'Wayne',
+  name: 'The Titan',
   stamina: 100,
   maxStamina: 100,
   hp: 100,
@@ -11,7 +11,7 @@ export const PLAYER_WAYNE = {
 };
 
 export const PLAYER_CINDY = {
-  name: 'Cindy',
+  name: 'The Goddess',
   stamina: 100,
   maxStamina: 100,
   hp: 100,
