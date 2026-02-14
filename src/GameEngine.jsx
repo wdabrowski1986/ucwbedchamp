@@ -694,6 +694,8 @@ function GameEngine({ modeKey, enabledMoves }) {
     let winner = null;
     if (modeKey === 'suddendeath') {
       if (suddenDeathWinner) winner = suddenDeathWinner;
+    } else if (modeKey === 'ironwoman') {
+      if (ironWomanWinner) winner = ironWomanWinner;
     } else if (wayne.hp <= 0 && cindy.hp <= 0) {
       winner = 'Tie';
     } else if (wayne.hp <= 0) {
@@ -773,7 +775,7 @@ function GameEngine({ modeKey, enabledMoves }) {
       }
       setMatchWinner(winner);
     }
-  }, [wayne.hp, cindy.hp, timer, mode.duration, matchWinner, modeKey, lastResolvedMove, score, submissions, coinFlipResult, orgasms, suddenDeathWinner]);
+  }, [wayne.hp, cindy.hp, timer, mode.duration, matchWinner, modeKey, lastResolvedMove, score, submissions, coinFlipResult, orgasms, suddenDeathWinner, ironWomanWinner]);
   // ...existing code...
   // Iron Woman: clothing removed at 5/10/15 min
   let ironWomanClothing = null;
@@ -1517,6 +1519,46 @@ function GameEngine({ modeKey, enabledMoves }) {
                       Force Next Turn
                     </button>
                   </div>
+                  {modeKey === 'ironwoman' && !matchWinner && (
+                    <div style={{ display: 'flex', gap: '14px', marginTop: '14px', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
+                      <button
+                        onClick={() => {
+                          setIronWomanWinner('Cindy');
+                          postMatchMessage(`${getRingName('Wayne')} screams I QUIT! ${getRingName('Cindy')} wins the Iron Woman!`);
+                        }}
+                        style={{
+                          ...primaryButtonBase,
+                          flex: 1,
+                          border: '1px solid rgba(229,9,20,0.5)',
+                          background: 'linear-gradient(120deg, #8b0000 0%, #2a0000 100%)',
+                          color: '#fff',
+                          cursor: 'pointer',
+                          boxShadow: '0 15px 35px rgba(139,0,0,0.35)',
+                          fontSize: isMobile ? '0.95em' : '1.05em',
+                        }}
+                      >
+                        {getRingName('Wayne')} Quits
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIronWomanWinner('Wayne');
+                          postMatchMessage(`${getRingName('Cindy')} screams I QUIT! ${getRingName('Wayne')} wins the Iron Woman!`);
+                        }}
+                        style={{
+                          ...primaryButtonBase,
+                          flex: 1,
+                          border: '1px solid rgba(255,77,109,0.5)',
+                          background: 'linear-gradient(120deg, #8b004a 0%, #2a0015 100%)',
+                          color: '#fff',
+                          cursor: 'pointer',
+                          boxShadow: '0 15px 35px rgba(139,0,74,0.35)',
+                          fontSize: isMobile ? '0.95em' : '1.05em',
+                        }}
+                      >
+                        {getRingName('Cindy')} Quits
+                      </button>
+                    </div>
+                  )}
                   {isStrikeMove && (
                     <div style={{ marginTop: 6, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>
                       Strikes cannot be escaped — tap Next Move to resolve the blow.
