@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { PLAYER_WAYNE, PLAYER_CINDY, GAME_MODES, CLOTHING_LAYERS } from './gameData';
 import { MOVE_DETAILS } from './moveDetails';
 import useMobile from './hooks/useMobile';
@@ -66,120 +66,70 @@ const DUNGEON_THEME = {
   textMuted: '#d9b2b2',
 };
 
+const MAX_CLOTHING_LAYER = CLOTHING_LAYERS.reduce(
+  (max, layer) => Math.max(max, layer?.layer ?? 0),
+  0
+);
+
+const SUBMISSION_TYPES = new Set(['Physical', 'Challenge', 'Smother', 'Finisher']);
+
+function getRingName(key) {
+  if (key === 'Wayne') return PLAYER_WAYNE?.name || 'Wayne';
+  if (key === 'Cindy') return PLAYER_CINDY?.name || 'Cindy';
+  if (typeof key === 'string') return key;
+  return 'Unknown';
+}
+
 const VICTORY_TALES = {
   default: [
-    ({ winner, loser }) => `${winner} presses the crimson belt against ${loser}'s lips and demands a kiss of surrender.`,
-    ({ winner, loser }) => `${winner} straddles the mattress throne while ${loser} massages every aching muscle as tribute.`,
-    ({ winner, loser }) => `${winner} knots ${loser} in satin sheets and collects slow, sweet apologies for every point lost.`,
-    ({ winner, loser }) => `${winner} drapes the belt across bare hips and orders ${loser} to worship every curve in thanks.`,
-    ({ winner, loser }) => `${winner} locks wrists above ${loser}'s head and makes them whisper every round recap into the belt.`,
-    ({ winner, loser }) => `${winner} lounges on the edge of the bed while ${loser} polishes the buckle with lingering kisses.`,
-    ({ winner, loser }) => `${winner} makes ${loser} wear the belt like a collar and purr out a promise for next match.`,
-    ({ winner, loser }) => `${winner} claims the center pillows while ${loser} fans them with silk until the sweat cools.`,
-    ({ winner, loser, scoreLine }) => `${winner} taps the ${scoreLine} scoreboard and tells ${loser} to kiss each glowing digit.`,
-    ({ winner, loser, submissionLine }) => `${winner} makes ${loser} count the ${submissionLine} submission gap on their knees with the belt in their teeth.`,
+    ({ winner, loser }) => `${winner} presses ${loser}'s lips to their thigh and refuses to release until every inch is worshipped.`,
+    ({ winner, loser }) => `${winner} straddles the mattress throne while ${loser} kneads tired muscles and murmurs praises.`,
+    ({ winner, loser }) => `${winner} knots ${loser} in satin sheets and orders a slow trail of kisses from ankle to hip.`,
+    ({ winner, loser }) => `${winner} hooks ${loser}'s wrists overhead and makes them chant devotion between each kiss.`,
+    ({ winner, loser }) => `${winner} lounges with one heel on ${loser}'s back, guiding their mouth wherever worship is owed.`,
+    ({ winner, loser }) => `${winner} keeps ${loser} kneeling and counts down points while they kiss along every muscle.`,
+    ({ winner, loser }) => `${winner} blindfolds ${loser} and demands worship by touch alone until the tremors stop.`,
+    ({ winner, loser }) => `${winner} pulls ${loser} into their lap and makes them whisper gratitude for each earned bruise.`,
+    ({ winner, loser, scoreLine }) => `${winner} taps the ${scoreLine} scoreboard and commands ${loser} to kiss from toes to lips for every digit.`,
+    ({ winner, loser, submissionLine }) => `${winner} makes ${loser} count the ${submissionLine} submission edge with kisses pressed to their arches.`,
   ],
   modes: {
     suddendeath: [
-      ({ winner, loser }) => `${winner} keeps ${loser} pinned in that finisher pose long enough to retell every sudden-death beat.`,
-      ({ winner, loser }) => `${loser} is marched around the mattress so ${winner} can display the belt and the final choke-out to the crowd.`,
+      ({ winner, loser }) => `${winner} freezes ${loser} in the finisher pose and makes them worship the limb that trapped them.`,
+      ({ winner, loser }) => `${winner} marches ${loser} around the mattress, forcing kisses on every bruised spot from the choke-out.`,
     ],
     ironwoman: [
-      ({ winner, loser }) => `${winner} makes ${loser} count every brutal Iron Woman minute while kissing the belt between numbers.`,
-      ({ winner, loser }) => `${loser} kneels by the clock rubbing tired calves as ${winner} slow-rolls a victory stretch across the sheets.`,
+      ({ winner, loser }) => `${winner} makes ${loser} recite every Iron Woman minute while kissing sweat-soaked skin.`,
+      ({ winner, loser }) => `${winner} seats ${loser} at their feet and demands calf-to-hip worship for surviving the clock.`,
     ],
     eroticfight: [
-      ({ winner, loser, scoreLine }) => `${winner} spritzes the scoreboard (${scoreLine}) with champagne while ${loser} licks every bubble as repayment.`,
-      ({ winner, loser }) => `${loser} recites the orgasm tally like a prayer while ${winner} lounges across the pillows with the belt.`,
+      ({ winner, loser, scoreLine }) => `${winner} spritzes the scoreboard (${scoreLine}) and makes ${loser} lick every droplet from their torso.`,
+      ({ winner, loser }) => `${loser} recites the orgasm tally on their knees while ${winner} steers their mouth wherever they please.`,
     ],
     quick: [
-      ({ winner, loser }) => `${winner} keeps the belt slung low and orders ${loser} back to starting position for another sprint.`,
-      ({ winner, loser }) => `${loser} grips the posts catching their breath while ${winner} rewinds the stopwatch with a wicked grin.`,
+      ({ winner, loser }) => `${winner} snaps fingers and orders ${loser} back to stance so they can worship between sprints.`,
+      ({ winner, loser }) => `${winner} keeps ${loser} braced on the posts kissing their knuckles before the next rush.`,
     ],
   },
   finisher: [
-    ({ winner, loser }) => `${winner} eases out of the finishing hold just enough to drag the belt across ${loser}'s goosebumps.`,
-    ({ winner, loser }) => `${loser} is left trembling while ${winner} traces the path of the finisher with the belt's cold buckle.`,
+    ({ winner, loser }) => `${winner} eases out of the finishing hold just enough to force kisses along the limb that sealed it.`,
+    ({ winner, loser }) => `${loser} trembles while ${winner} guides their mouth along the path of the finisher.`,
   ],
 };
 
 const DAMAGE_MODIFIERS = {
   default: 0.65,
   Strike: 0.5,
-  Physical: 0.7,
-  Challenge: 0.75,
-  Smother: 0.8,
-  Sensual: 1,
-  Finisher: 1,
 };
-
-const MODE_DAMAGE_MODIFIERS = {
-  practice: 0.55,
-  quick: 0.85,
-  endurance: 0.9,
-  ironwoman: 0.85,
-  suddendeath: 1,
-};
-
-const SUBMISSION_TYPES = new Set(['Challenge', 'Physical', 'Smother', 'Finisher']);
 
 function getEffectiveDamage(move, modeKey) {
+  void modeKey;
   if (!move || typeof move.damage !== 'number') return 0;
-  if (move.damage <= 0) return move.damage;
-  const typeMultiplier = DAMAGE_MODIFIERS[move.type] ?? DAMAGE_MODIFIERS.default;
-  const modeMultiplier = MODE_DAMAGE_MODIFIERS[modeKey] ?? 1;
-  return Math.max(1, Math.round(move.damage * typeMultiplier * modeMultiplier));
-}
+  if (move.type === 'Finisher') return move.damage;
 
-const RING_NAMES = {
-  Wayne: 'The Titan',
-  Cindy: 'The Goddess',
-};
-
-function getRingName(fighter) {
-  return RING_NAMES[fighter] ?? fighter;
-}
-
-const MAX_CLOTHING_LAYER = Math.max(...CLOTHING_LAYERS.map(layer => layer.layer));
-
-function opponentOf(fighter) {
-  return fighter === 'Wayne' ? 'Cindy' : 'Wayne';
-}
-
-function calculateDamageDealt(opponentHp, opponentMaxHp) {
-  const safeMax = typeof opponentMaxHp === 'number' ? opponentMaxHp : 100;
-  const safeHp = Math.max(0, typeof opponentHp === 'number' ? opponentHp : safeMax);
-  return Math.max(0, safeMax - safeHp);
-}
-
-function compareMetric(wayneValue = 0, cindyValue = 0, method = 'Decision', detailFactory) {
-  if (wayneValue === cindyValue) return null;
-  const winner = wayneValue > cindyValue ? 'Wayne' : 'Cindy';
-  const loser = opponentOf(winner);
-  const winnerValue = winner === 'Wayne' ? wayneValue : cindyValue;
-  const loserValue = winner === 'Wayne' ? cindyValue : wayneValue;
-  const detail = typeof detailFactory === 'function'
-    ? detailFactory({ winner, loser, winnerValue, loserValue })
-    : `${getRingName(winner)} edges the ${method.toLowerCase()} ${winnerValue}-${loserValue}.`;
-  return { winner, method, detail };
-}
-
-function compareSubmissionsEdge(state, label = 'Submission Edge') {
-  return compareMetric(
-    state?.submissions?.Wayne ?? 0,
-    state?.submissions?.Cindy ?? 0,
-    label,
-    ({ winner, loser, winnerValue, loserValue }) => `${getRingName(winner)} owns submissions ${winnerValue}-${loserValue} over ${getRingName(loser)}.`
-  );
-}
-
-function compareDamageEdge(state, label = 'Damage Edge') {
-  return compareMetric(
-    state?.damageDealt?.Wayne ?? 0,
-    state?.damageDealt?.Cindy ?? 0,
-    label,
-    ({ winner, loser, winnerValue, loserValue }) => `${getRingName(winner)} dealt ${winnerValue} total damage (vs ${loserValue}).`
-  );
+  const modifier = DAMAGE_MODIFIERS[move.type] ?? DAMAGE_MODIFIERS.default ?? 1;
+  const scaledMagnitude = Math.max(1, Math.round(Math.abs(move.damage) * modifier));
+  return move.damage >= 0 ? scaledMagnitude : -scaledMagnitude;
 }
 
 function compareExposureEdge(state) {
@@ -263,7 +213,7 @@ function resolveModeTiebreaker(modeKey, state) {
 
 const TIE_TALES = [
   () => 'Both lovers collapse in a knot of limbs — no one owns the bed tonight.',
-  () => 'They throw the belt between them and trade lazy kisses until the sweat dries.',
+  () => 'They sprawl side by side and promise to make each other worship harder in the rematch.',
   ({ modeKey }) => modeKey === 'ironwoman'
     ? 'Hours melt away with neither warrior breaking — the clock surrenders instead.'
     : 'The arena lights dim while they agree the next bout decides everything.',
@@ -276,22 +226,22 @@ const WIN_HEADLINES = [
 ];
 
 const WIN_SUBHEADINGS = [
-  ({ winner, loser }) => `${winner} claims the scarlet belt while ${loser} submits beneath silk.`,
-  ({ winner, loser, scoreLine }) => `${winner} dominates ${loser} ${scoreLine} and parades the belt over their hips.`,
-  ({ winner, loser, submissionLine }) => `${winner} racks up a ${submissionLine} submission edge, leaving ${loser} breathless in satin cuffs.`,
+  ({ winner, loser }) => `${winner} plants ${loser} between their knees and demands worship as tribute.`,
+  ({ winner, loser, scoreLine }) => `${winner} dominates ${loser} ${scoreLine} and makes them whisper praise between every breath.`,
+  ({ winner, loser, submissionLine }) => `${winner} rides a ${submissionLine} submission edge and turns ${loser} into a trembling worshipper.`,
 ];
 
 const TIE_HEADLINES = [
   () => 'Velvet Deadlock',
   () => 'Double Knockout',
-  () => 'No Belt Tonight',
+  () => 'Devotion Deferred',
 ];
 
 const TIE_SUBHEADINGS = [
   ({ modeKey }) => modeKey === 'ironwoman'
     ? 'The Iron Woman clock quits before either fighter does.'
-    : 'No belt awarded — both lovers collapse breathless.',
-  () => 'Sweat, silk, and stalemate — rematch required.',
+    : 'No throne claimed — both lovers collapse before anyone can demand worship.',
+  () => 'Sweat, silk, and stalemate — devotion postponed.',
 ];
 
 function pickTemplate(templates, context) {
@@ -317,7 +267,7 @@ function pickVictoryTale(context) {
   }
   const combined = pools.flat();
   if (combined.length === 0) {
-    return `${context.winner} lounges with the belt while ${context.loser} plots a comeback.`;
+    return `${context.winner} keeps ${context.loser} kneeling, demanding worship until the next challenge.`;
   }
   const lineFactory = combined[Math.floor(Math.random() * combined.length)];
   return lineFactory(context);
@@ -357,6 +307,13 @@ function GameEngine({ modeKey, enabledMoves }) {
       setSubmitted(true);
       setLastResolvedMove({ name: move.name, type: move.type, by: attacker, resolved: true });
       setLastMoveName(prev => ({ ...prev, [attacker]: move.name }));
+      setLastMoveType(prev => ({ ...prev, [attacker]: move.type }));
+      if (move.type) {
+        setTypeHistory(prev => {
+          const history = [...(prev[attacker] || []), move.type].slice(-3);
+          return { ...prev, [attacker]: history };
+        });
+      }
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
       const attackerName = getRingName(attacker);
       const defenderName = getRingName(defender);
@@ -381,21 +338,26 @@ function GameEngine({ modeKey, enabledMoves }) {
       }
 
       const causesSubmission = move.type ? SUBMISSION_TYPES.has(move.type) : false;
+      let finalMessage = '';
       if (causesSubmission) {
         setSubmissions(sub => ({
           ...sub,
           [attacker]: sub[attacker] + 1,
         }));
-        setMessage(
-          damageMessage
-            ? `${attackerName} performed ${move.name} and scored a submission! ${damageMessage}`
-            : `${attackerName} performed ${move.name} and scored a submission!`
-        );
+        setScore(scoreboard => ({
+          ...scoreboard,
+          [attacker]: (scoreboard[attacker] ?? 0) + 1,
+        }));
+        finalMessage = damageMessage
+          ? `${attackerName} performed ${move.name} and scored a submission! ${damageMessage}`
+          : `${attackerName} performed ${move.name} and scored a submission!`;
       } else if (damageMessage) {
-        setMessage(damageMessage);
+        finalMessage = damageMessage;
       } else {
-        setMessage(`${attackerName} performed ${move.name}.`);
+        finalMessage = `${attackerName} performed ${move.name}.`;
       }
+
+      postMatchMessage(finalMessage);
 
       setTimeout(nextTurn, 1200);
     }
@@ -405,9 +367,16 @@ function GameEngine({ modeKey, enabledMoves }) {
       setSubmitted(true);
       setLastResolvedMove({ name: move.name, type: move.type, resolved: false });
       setLastMoveName(prev => ({ ...prev, [attacker]: move.name }));
+      setLastMoveType(prev => ({ ...prev, [attacker]: move.type }));
+      if (move.type) {
+        setTypeHistory(prev => {
+          const history = [...(prev[attacker] || []), move.type].slice(-3);
+          return { ...prev, [attacker]: history };
+        });
+      }
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
       const defenderName = getRingName(defender);
-      setMessage(`${defenderName} escapes ${move.name} — the belt stays in question!`);
+        postMatchMessage(`${defenderName} escapes ${move.name} — the worship session will have to wait!`);
       setTimeout(nextTurn, 1200);
     }
   const [attacker, setAttacker] = useState(rollAttacker);
@@ -438,6 +407,7 @@ function GameEngine({ modeKey, enabledMoves }) {
   const [wayneStunned, setWayneStunned] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState('');
+  const [matchLog, setMatchLog] = useState([]);
   const [submissions, setSubmissions] = useState({ Wayne: 0, Cindy: 0 });
   const [matchWinner, setMatchWinner] = useState(null);
   const [victoryQuote, setVictoryQuote] = useState('');
@@ -445,11 +415,19 @@ function GameEngine({ modeKey, enabledMoves }) {
   const [victorySubheading, setVictorySubheading] = useState('');
   const [lastResolvedMove, setLastResolvedMove] = useState(null);
   const isMobile = useMobile(768);
+  const postMatchMessage = useCallback(text => {
+    if (!text) return;
+    setMessage(text);
+    setMatchLog(prev => [...prev, text]);
+  }, []);
 
   // Deck system for move selection
   const [moveDeck, setMoveDeck] = useState([]);
   const [usedMoves, setUsedMoves] = useState({ Wayne: [], Cindy: [] });
   const [lastMoveName, setLastMoveName] = useState({ Wayne: null, Cindy: null });
+  const [lastMoveType, setLastMoveType] = useState({ Wayne: null, Cindy: null });
+  const [typeHistory, setTypeHistory] = useState({ Wayne: [], Cindy: [] });
+  const [recentMoves, setRecentMoves] = useState({ Wayne: [], Cindy: [] });
 
   const resetMatch = () => {
     const freshAttacker = rollAttacker();
@@ -473,6 +451,7 @@ function GameEngine({ modeKey, enabledMoves }) {
     setWayneStunned(false);
     setSubmitted(false);
     setMessage('');
+    setMatchLog([]);
     setSubmissions({ Wayne: 0, Cindy: 0 });
     setMatchWinner(null);
     setVictoryQuote('');
@@ -482,6 +461,9 @@ function GameEngine({ modeKey, enabledMoves }) {
     setMoveDeck([]);
     setUsedMoves({ Wayne: [], Cindy: [] });
     setLastMoveName({ Wayne: null, Cindy: null });
+    setLastMoveType({ Wayne: null, Cindy: null });
+    setTypeHistory({ Wayne: [], Cindy: [] });
+    setRecentMoves({ Wayne: [], Cindy: [] });
   };
 
   function buildMoveDeck() {
@@ -519,6 +501,9 @@ function GameEngine({ modeKey, enabledMoves }) {
   useEffect(() => {
     setUsedMoves({ Wayne: [], Cindy: [] });
     setLastMoveName({ Wayne: null, Cindy: null });
+    setLastMoveType({ Wayne: null, Cindy: null });
+    setTypeHistory({ Wayne: [], Cindy: [] });
+    setRecentMoves({ Wayne: [], Cindy: [] });
   }, [enabledMoves, modeKey]);
 
   function randomMove() {
@@ -535,19 +520,67 @@ function GameEngine({ modeKey, enabledMoves }) {
       pool = nonSensualMoves;
     }
 
-    const uniqueNames = Array.from(new Set(pool.map(m => m.name)));
-    const uniqueLimit = uniqueNames.length || 1;
-
-    let history = usedMoves[attacker] || [];
-    let available = pool.filter(m => !history.includes(m.name));
-    if (available.length === 0) {
-      history = [];
-      available = pool;
+    if (lastMoveType[attacker] === 'Strike') {
+      const submissionEligible = pool.filter(m => SUBMISSION_TYPES.has(m.type));
+      if (submissionEligible.length > 0) {
+        pool = submissionEligible;
+      }
     }
 
-    const recentName = history.length > 0 ? history[history.length - 1] : lastMoveName[attacker];
-    if (recentName) {
-      const filtered = available.filter(m => m.name !== recentName);
+    const attackerTypeHistory = typeHistory[attacker] || [];
+    if (attackerTypeHistory.length >= 2) {
+      const lastType = attackerTypeHistory[attackerTypeHistory.length - 1];
+      let streak = lastType ? 1 : 0;
+      for (let i = attackerTypeHistory.length - 2; i >= 0 && lastType; i -= 1) {
+        if (attackerTypeHistory[i] === lastType) {
+          streak += 1;
+        } else {
+          break;
+        }
+      }
+      if (lastType && streak >= 2) {
+        const variedPool = pool.filter(m => m.type !== lastType);
+        if (variedPool.length > 0) {
+          pool = variedPool;
+        }
+      }
+    }
+
+    const recentSequence = recentMoves[attacker] || [];
+    if (recentSequence.length > 0) {
+      const freshPool = pool.filter(m => !recentSequence.includes(m.name));
+      if (freshPool.length > 0) {
+        pool = freshPool;
+      }
+    }
+
+    const uniqueNames = Array.from(new Set(pool.map(m => m.name)));
+    const uniqueLimit = uniqueNames.length || 1;
+    const shouldCycleDeck = modeKey !== 'quick' && uniqueNames.length > 3;
+    let history = shouldCycleDeck ? usedMoves[attacker] || [] : [];
+    let available = pool;
+    let historyReset = false;
+
+    if (shouldCycleDeck) {
+      available = pool.filter(m => !history.includes(m.name));
+      if (available.length === 0) {
+        history = [];
+        available = pool;
+        historyReset = true;
+      }
+
+      const recentName = history.length > 0 ? history[history.length - 1] : lastMoveName[attacker];
+      if (recentName && !historyReset) {
+        const filtered = available.filter(m => m.name !== recentName);
+        if (filtered.length > 0) {
+          available = filtered;
+        }
+      }
+    }
+
+    const previousResolvedMove = lastResolvedMove?.name;
+    if (previousResolvedMove && lastResolvedMove?.by !== attacker) {
+      const filtered = available.filter(m => m.name !== previousResolvedMove);
       if (filtered.length > 0) {
         available = filtered;
       }
@@ -555,9 +588,17 @@ function GameEngine({ modeKey, enabledMoves }) {
 
     const idx = Math.floor(Math.random() * available.length);
     const nextMove = available[idx];
-    const nextHistory = [...history, nextMove.name];
-    const trimmedHistory = nextHistory.slice(-uniqueLimit);
-    setUsedMoves(prev => ({ ...prev, [attacker]: trimmedHistory }));
+    if (shouldCycleDeck) {
+      const nextHistory = [...history, nextMove.name];
+      const trimmedHistory = nextHistory.slice(-uniqueLimit);
+      setUsedMoves(prev => ({ ...prev, [attacker]: trimmedHistory }));
+    } else if ((usedMoves[attacker] || []).length) {
+      setUsedMoves(prev => ({ ...prev, [attacker]: [] }));
+    }
+    setRecentMoves(prev => {
+      const updated = [...(prev[attacker] || []), nextMove.name].slice(-3);
+      return { ...prev, [attacker]: updated };
+    });
     return nextMove;
   }
 
@@ -582,9 +623,9 @@ function GameEngine({ modeKey, enabledMoves }) {
   useEffect(() => {
     if (modeKey === 'suddendeath' && (wayne.hp === 0 || cindy.hp === 0) && !finalStand) {
       setFinalStand(true);
-      setMessage('Final Stand! Player is completely exposed.');
+      postMatchMessage('Final Stand! Player is completely exposed.');
     }
-  }, [wayne.hp, cindy.hp, modeKey, finalStand]);
+  }, [wayne.hp, cindy.hp, modeKey, finalStand, postMatchMessage]);
 
   useEffect(() => {
     if (matchWinner) return;
@@ -597,7 +638,13 @@ function GameEngine({ modeKey, enabledMoves }) {
     } else if (cindy.hp <= 0) {
       winner = 'Wayne';
     } else if (mode.duration && timer <= 0) {
-      if (wayne.hp === cindy.hp) {
+      if (modeKey === 'quick') {
+        if (submissions.Wayne === submissions.Cindy) {
+          winner = 'Tie';
+        } else {
+          winner = submissions.Wayne > submissions.Cindy ? 'Wayne' : 'Cindy';
+        }
+      } else if (wayne.hp === cindy.hp) {
         winner = 'Tie';
       } else {
         winner = wayne.hp > cindy.hp ? 'Wayne' : 'Cindy';
@@ -646,15 +693,19 @@ function GameEngine({ modeKey, enabledMoves }) {
           scoreLine,
           submissionLine,
         };
+        const worshipLine = winner === 'Wayne'
+          ? `${getRingName('Cindy')} worships ${getRingName('Wayne')} in Titan reverence.`
+          : `${getRingName('Wayne')} kneels to worship ${getRingName('Cindy')} the Goddess.`;
+        const addWorshipTag = base => `${base ? `${base} ` : ''}${worshipLine}`.trim();
         setVictoryHeading(pickTemplate(WIN_HEADLINES, context));
         if (appliedTiebreaker) {
           setVictorySubheading(`${getRingName(winner)} wins via ${appliedTiebreaker.method}.`);
           const baseQuote = pickVictoryTale(context);
           const detail = appliedTiebreaker.detail ? `${appliedTiebreaker.detail} ` : '';
-          setVictoryQuote(`${detail}${baseQuote}`.trim());
+          setVictoryQuote(addWorshipTag(`${detail}${baseQuote}`.trim()));
         } else {
           setVictorySubheading(pickTemplate(WIN_SUBHEADINGS, context));
-          setVictoryQuote(pickVictoryTale(context));
+          setVictoryQuote(addWorshipTag(pickVictoryTale(context)));
         }
       }
       setMatchWinner(winner);
@@ -688,6 +739,7 @@ function GameEngine({ modeKey, enabledMoves }) {
   const deckHasNonSensual = moveDeck.some(m => m.type !== 'Sensual');
   const currentMoveDetails = move ? MOVE_DETAILS[move.name] : null;
   const moveImageSrc = currentMoveDetails?.image ? `/images/${currentMoveDetails.image}` : null;
+  const isStrikeMove = move?.type === 'Strike';
   const showTimerBox = modeKey === 'ironwoman' || Boolean(mode.duration);
   const timerBoxLabel = modeKey === 'ironwoman' ? 'Elapsed' : 'Timer';
   const timerBoxValue = showTimerBox
@@ -695,6 +747,7 @@ function GameEngine({ modeKey, enabledMoves }) {
       ? formatTime(timer)
       : formatTime(Math.max(timer, 0))
     : '';
+  const timerDisplay = showTimerBox ? timerBoxValue : 'Open Play';
   let moveStatusMessage = '';
   if (enabledMoves.length === 0) {
     moveStatusMessage = 'All moves are disabled. Enable at least one move in Move Settings.';
@@ -714,16 +767,6 @@ function GameEngine({ modeKey, enabledMoves }) {
     : 'No eligible moves for current attacker.';
   const actionDisabled = submitted || !move || showCoinFlip || Boolean(matchWinner);
   const layoutPadding = isMobile ? '28px 14px 90px' : '60px clamp(32px,6vw,96px) 120px';
-  const statCardStyle = {
-    flex: isMobile ? '1 1 100%' : '1 1 260px',
-    background: 'linear-gradient(150deg, rgba(6,0,0,0.92), rgba(30,0,8,0.78))',
-    borderRadius: 24,
-    padding: isMobile ? '16px 18px' : '20px 22px',
-    border: '1px solid rgba(255,255,255,0.08)',
-    boxShadow: '0 30px 55px rgba(0,0,0,0.55)',
-    textAlign: isMobile ? 'center' : 'left',
-    backdropFilter: 'blur(4px)',
-  };
   const playerCardBase = {
     background: 'linear-gradient(160deg, rgba(8,0,0,0.96), rgba(32,0,6,0.78))',
     borderRadius: 28,
@@ -749,10 +792,66 @@ function GameEngine({ modeKey, enabledMoves }) {
     gap: isMobile ? '18px' : '26px',
     alignItems: 'flex-start',
   };
+  const stagePanelStyle = {
+    position: 'relative',
+    borderRadius: isMobile ? 26 : 34,
+    padding: isMobile ? '18px 14px' : '26px',
+    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'linear-gradient(160deg, rgba(4,0,4,0.9), rgba(14,0,10,0.7))',
+    boxShadow: '0 45px 90px rgba(0,0,0,0.55)',
+    overflow: 'hidden',
+  };
+  const scorePanelStyle = {
+    background: 'linear-gradient(155deg, rgba(10,0,12,0.92), rgba(38,0,20,0.78))',
+    border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+    borderRadius: isMobile ? 24 : 32,
+    padding: isMobile ? '18px 18px' : '26px 32px',
+    boxShadow: '0 35px 80px rgba(0,0,0,0.45)',
+    marginBottom: isMobile ? 18 : 28,
+  };
+  const scoreMetricsRowStyle = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: isMobile ? '12px' : '20px',
+  };
+  const scoreMetricStyle = {
+    flex: isMobile ? '1 1 100%' : '1 1 calc(33.33% - 14px)',
+    borderRadius: 20,
+    padding: isMobile ? '14px 16px' : '18px 20px',
+    border: '1px solid rgba(255,255,255,0.15)',
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.35))',
+    backdropFilter: 'blur(10px)',
+    minHeight: 92,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  };
+  const metricLabelStyle = {
+    fontSize: '0.75em',
+    letterSpacing: '0.28em',
+    textTransform: 'uppercase',
+    color: DUNGEON_THEME.textMuted,
+  };
+  const metricValueStyle = {
+    fontSize: isMobile ? '1.35em' : '1.6em',
+    fontWeight: 700,
+    color: '#fff',
+  };
   const columnStackStyle = {
     display: 'flex',
     flexDirection: 'column',
     gap: isMobile ? '16px' : '22px',
+  };
+  const attackerBadgeStyle = {
+    borderRadius: 20,
+    border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
+    padding: isMobile ? '10px 14px' : '12px 18px',
+    background: 'rgba(255,255,255,0.04)',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    letterSpacing: '0.08em',
+    fontSize: isMobile ? '0.95em' : '1.05em',
   };
   const victoryLoser = matchWinner === 'Wayne' ? 'Cindy' : matchWinner === 'Cindy' ? 'Wayne' : null;
   const decoratedWinner = matchWinner && matchWinner !== 'Tie' ? getRingName(matchWinner) : matchWinner;
@@ -763,9 +862,9 @@ function GameEngine({ modeKey, enabledMoves }) {
       ? `${decoratedWinner} Rules the Bed`
       : '');
   const overlaySubheading = victorySubheading || (matchWinner === 'Tie'
-    ? 'No belt awarded — both lovers collapse breathless.'
+    ? 'Devotion deferred — both lovers collapse before they can force worship.'
     : decoratedWinner && decoratedLoser
-      ? `${decoratedWinner} claims the scarlet belt while ${decoratedLoser} submits beneath silk.`
+      ? `${decoratedWinner} keeps ${decoratedLoser} kneeling and demanding worship for every bruise.`
       : '');
 
   // Erotic Fight Mode: Only show special UI
@@ -1018,338 +1117,392 @@ function GameEngine({ modeKey, enabledMoves }) {
         </div>
       )}
       <div style={{ position: 'relative', zIndex: 1, maxWidth: '1180px', margin: '0 auto', width: '100%' }}>
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: isMobile ? '10px' : '18px',
-            alignItems: isMobile ? 'flex-start' : 'center',
-            background: 'linear-gradient(150deg, rgba(8,0,0,0.95), rgba(48,0,8,0.7))',
-            borderRadius: 28,
-            padding: isMobile ? '14px 16px' : '18px 28px',
-            border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
-            boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
-            marginBottom: isMobile ? '18px' : '26px',
-          }}
-        >
-          <div style={{ fontSize: isMobile ? '1.6em' : '2.4em', fontWeight: 700, letterSpacing: '0.06em' }}>{mode.name}</div>
-          <div style={{ fontSize: isMobile ? '0.95em' : '1.15em', letterSpacing: '0.18em', textTransform: 'uppercase', color: DUNGEON_THEME.textMuted }}>
-            Round {round}
+        <div style={scorePanelStyle}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 12,
+              marginBottom: 12,
+            }}
+          >
+            <div style={{ fontSize: '0.85em', letterSpacing: '0.35em', textTransform: 'uppercase', color: '#ff9fbb' }}>Velvet Scoreboard</div>
+            <div style={{ fontSize: '1em', letterSpacing: '0.18em', color: DUNGEON_THEME.textMuted }}>Round {round}</div>
           </div>
-          {showTimerBox && (
-            <div
-              style={{
-                marginLeft: isMobile ? 0 : 'auto',
-                fontSize: isMobile ? '1em' : '1.25em',
-                border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
-                borderRadius: 18,
-                padding: isMobile ? '0.4em 0.9em' : '0.5em 1.4em',
-                background: 'linear-gradient(120deg, rgba(229,9,20,0.25), rgba(90,0,0,0.8))',
-                width: isMobile ? '100%' : 'auto',
-                textAlign: 'center',
-                boxShadow: DUNGEON_THEME.glowPrimary,
-              }}
-            >
-              <span style={{ color: DUNGEON_THEME.neonPink, fontWeight: 700 }}>{timerBoxLabel}:</span> {timerBoxValue}
+          <div style={scoreMetricsRowStyle}>
+            <div style={{ ...scoreMetricStyle, border: `1px solid ${DUNGEON_THEME.borderPrimary}` }}>
+              <div style={metricLabelStyle}>Points</div>
+              <div style={{ ...metricValueStyle, color: DUNGEON_THEME.neonPink }}>
+                {getRingName('Wayne')} {score.Wayne} • {getRingName('Cindy')} {score.Cindy}
+              </div>
             </div>
-          )}
+            <div style={scoreMetricStyle}>
+              <div style={metricLabelStyle}>Submissions</div>
+              <div style={metricValueStyle}>
+                {getRingName('Wayne')} {submissions.Wayne} • {getRingName('Cindy')} {submissions.Cindy}
+              </div>
+            </div>
+            <div style={scoreMetricStyle}>
+              <div style={metricLabelStyle}>{showTimerBox ? timerBoxLabel : 'Free Flow'}</div>
+              <div style={metricValueStyle}>{timerDisplay}</div>
+            </div>
+          </div>
         </div>
 
-        <div style={mainGridStyle}>
-          <div style={columnStackStyle}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '12px' : '18px', width: '100%' }}>
-              <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderPrimary}` }}>
-                <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Scoreboard</div>
-                <div style={{ fontSize: '1.45em' }}>{getRingName('Wayne')} {score.Wayne} &bull; {getRingName('Cindy')} {score.Cindy}</div>
-              </div>
-              <div style={{ ...statCardStyle, border: `1px solid ${DUNGEON_THEME.borderSecondary}` }}>
-                <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Submissions</div>
-                <div style={{ fontSize: '1.45em' }}>{getRingName('Wayne')} {submissions.Wayne} &bull; {getRingName('Cindy')} {submissions.Cindy}</div>
-              </div>
-              <div style={{ ...statCardStyle, border: '1px solid rgba(100,108,255,0.45)' }}>
-                <div style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: 6 }}>Attacker</div>
-                <div style={{ fontSize: '1.3em' }}>{getRingName(attacker)}</div>
-              </div>
+        {modeKey !== 'quick' && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: isMobile ? '10px' : '18px',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              background: 'linear-gradient(150deg, rgba(8,0,0,0.95), rgba(48,0,8,0.7))',
+              borderRadius: 28,
+              padding: isMobile ? '14px 16px' : '18px 28px',
+              border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
+              boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+              marginBottom: isMobile ? '18px' : '26px',
+            }}
+          >
+            <div style={{ fontSize: isMobile ? '1.6em' : '2.4em', fontWeight: 700, letterSpacing: '0.06em' }}>{mode.name}</div>
+            <div style={{ fontSize: isMobile ? '0.95em' : '1.15em', letterSpacing: '0.18em', textTransform: 'uppercase', color: DUNGEON_THEME.textMuted }}>
+              Round {round}
             </div>
-
-            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px' }}>
-              {players.map(player => {
-                const maxHp = player.data.maxHp || 100;
-                const hpPercent = Math.max(0, Math.round((player.data.hp / maxHp) * 100));
-                return (
-                  <div
-                    key={player.key}
-                    style={{
-                      flex: isMobile ? '1 1 100%' : '1 1 320px',
-                      width: '100%',
-                      ...playerCardBase,
-                      border: `1px solid ${player.accent}55`,
-                      backdropFilter: 'blur(6px)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: `linear-gradient(130deg, ${player.accent}22, transparent 65%)`,
-                        pointerEvents: 'none',
-                      }}
-                    />
-                    <div style={{ position: 'relative', zIndex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                        <span style={{ fontSize: isMobile ? '1.2em' : '1.4em', fontWeight: 700 }}>{player.label}</span>
-                        <span
-                          style={{
-                            fontSize: isMobile ? '0.85em' : '0.95em',
-                            letterSpacing: '0.12em',
-                            color: attacker === player.key ? DUNGEON_THEME.neonPink : DUNGEON_THEME.textMuted,
-                            border: attacker === player.key ? `1px solid ${DUNGEON_THEME.borderPrimary}` : '1px solid rgba(255,255,255,0.08)',
-                            borderRadius: 999,
-                            padding: '0.3em 1.1em',
-                            background: attacker === player.key ? 'rgba(255,45,149,0.08)' : 'rgba(255,255,255,0.04)',
-                          }}
-                        >
-                          {attacker === player.key ? 'ATTACKING' : 'DEFENDING'}
-                        </span>
-                      </div>
-                      <div style={{ height: 18, borderRadius: 999, background: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 12 }}>
-                        <div
-                          style={{
-                            width: `${hpPercent}%`,
-                            height: '100%',
-                            background: `linear-gradient(90deg, ${player.accent}, ${player.accent}aa)`,
-                            transition: 'width 0.35s ease',
-                            boxShadow: `0 0 18px ${player.accent}55`,
-                          }}
-                        />
-                      </div>
-                      <div style={{ fontSize: '1em', marginBottom: 6 }}>HP {player.data.hp} / {maxHp}</div>
-                      <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 6 }}>Stamina {player.data.stamina}</div>
-                      <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Submissions {submissions[player.key]}</div>
-                      <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Score {score[player.key]}</div>
-                      {player.clothing && (
-                        <div style={{ marginTop: 8, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>
-                          <span style={{ fontSize: '1.2em', marginRight: 6 }}>{player.clothing.icon}</span>
-                          {player.clothing.status}
-                        </div>
-                      )}
-                      {player.key === 'Wayne' && wayneStunned && (
-                        <div style={{ marginTop: 8, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>{getRingName('Wayne')} is stunned!</div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div style={columnStackStyle}>
-            <div
-              style={{
-                background: DUNGEON_THEME.panel,
-                borderRadius: 26,
-                padding: isMobile ? '22px' : '30px',
-                border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
-                boxShadow: '0 45px 80px rgba(0,0,0,0.45)',
-              }}
-            >
-          <div style={{ fontSize: isMobile ? '1.3em' : '1.6em', fontWeight: 700, marginBottom: 12 }}>Current Move</div>
-          {move ? (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                gap: isMobile ? '16px' : '28px',
-                alignItems: 'stretch',
-              }}
-            >
-              <div style={{ textAlign: 'left', flex: '2 1 320px' }}>
-                <div style={{ fontSize: '1.35em', marginBottom: 6, color: '#fff' }}>{move.name}</div>
-                <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>Type: {move.type}</div>
-                <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>
-                  Damage {move.damage} &bull; Cost {move.cost} &bull; Accuracy {move.accuracy}%
-                </div>
-                {move.special && (
-                  <div style={{ fontSize: '0.95em', color: DUNGEON_THEME.ember, marginBottom: 8 }}>Special: {move.special}</div>
-                )}
-                {currentMoveDetails?.description && (
-                  <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 8 }}>{currentMoveDetails.description}</div>
-                )}
-              </div>
-              <div style={{ flex: '1 1 220px' }}>
-                {moveImageSrc ? (
-                  <div
-                    onClick={() => setShowImageModal({
-                      name: move.name,
-                      image: currentMoveDetails.image,
-                      description: currentMoveDetails.description,
-                    })}
-                    style={{
-                      borderRadius: 18,
-                      overflow: 'hidden',
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      boxShadow: '0 25px 45px rgba(0,0,0,0.4)',
-                      cursor: 'pointer',
-                      position: 'relative',
-                    }}
-                  >
-                    <img
-                      src={moveImageSrc}
-                      alt={`${move.name} illustration`}
-                      style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        padding: '6px 10px',
-                        background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.65) 100%)',
-                        fontSize: '0.85em',
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      Tap to enlarge
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      borderRadius: 18,
-                      border: '1px dashed rgba(255,255,255,0.2)',
-                      padding: '32px 18px',
-                      textAlign: 'center',
-                      color: DUNGEON_THEME.textMuted,
-                      fontSize: '0.95em',
-                    }}
-                  >
-                    Move art coming soon.
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div style={{ fontSize: '1.1em', color: '#f0caff' }}>{moveStatusMessage}</div>
-          )}
-          {!move && !moveStatusMessage && (
-            <div style={{ fontSize: '1.05em', color: '#f0caff', marginTop: 8 }}>Preparing next move...</div>
-          )}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginTop: '18px', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
-            <button
-              onClick={handleSubmit}
-              disabled={actionDisabled}
-              style={{
-                ...primaryButtonBase,
-                border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
-                background: actionDisabled
-                  ? 'rgba(255,255,255,0.08)'
-                  : 'linear-gradient(120deg, #e50914 0%, #3f0005 100%)',
-                color: '#fff',
-                cursor: actionDisabled ? 'not-allowed' : 'pointer',
-                boxShadow: actionDisabled ? 'none' : '0 25px 55px rgba(229,9,20,0.38)',
-              }}
-            >
-              {submitted ? 'Resolving...' : 'Submit Move'}
-            </button>
-            <button
-              onClick={handleEscape}
-              disabled={actionDisabled}
-              style={{
-                ...primaryButtonBase,
-                border: '1px solid rgba(255,255,255,0.15)',
-                background: actionDisabled
-                  ? 'rgba(255,255,255,0.04)'
-                  : 'linear-gradient(120deg, rgba(255,255,255,0.08), rgba(0,0,0,0.55))',
-                color: '#fff',
-                cursor: actionDisabled ? 'not-allowed' : 'pointer',
-                boxShadow: actionDisabled ? 'none' : '0 15px 35px rgba(0,0,0,0.45)',
-              }}
-            >
-              Escape Move
-            </button>
-            <button
-              onClick={nextTurn}
-              disabled={submitted || showCoinFlip || Boolean(matchWinner)}
-              style={{
-                ...primaryButtonBase,
-                border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
-                background: 'rgba(255,255,255,0.06)',
-                color: '#fff',
-                cursor: submitted || showCoinFlip || matchWinner ? 'not-allowed' : 'pointer',
-                boxShadow: '0 15px 35px rgba(0,0,0,0.35)',
-              }}
-            >
-              Force Next Turn
-            </button>
-          </div>
-          <div style={{ marginTop: 14, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>{deckSummary}</div>
-          {moveStatusMessage && move && (
-            <div style={{ marginTop: 6, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>{moveStatusMessage}</div>
-          )}
-        </div>
-
-            <div
-              style={{
-                background: 'linear-gradient(150deg, rgba(8,0,0,0.88), rgba(36,0,8,0.72))',
-                borderRadius: 24,
-                padding: isMobile ? '18px' : '24px',
-                border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
-                width: '100%',
-                boxShadow: '0 30px 55px rgba(0,0,0,0.4)',
-              }}
-            >
-              <div style={{ fontSize: isMobile ? '1.1em' : '1.25em', fontWeight: 700, marginBottom: 6 }}>Match Log</div>
-              <div style={{ fontSize: '1em', color: message ? '#fff' : DUNGEON_THEME.textMuted }}>
-                {message || 'Awaiting the next move...'}
-              </div>
-              {modeKey === 'suddendeath' && finalStand && (
-                <div style={{ marginTop: 10, fontSize: '1em', color: DUNGEON_THEME.ember }}>Final Stand triggered!</div>
-              )}
-            </div>
-
-            {modeKey === 'suddendeath' && finalStand && (
+            {showTimerBox && (
               <div
                 style={{
-                  background: 'linear-gradient(160deg, rgba(24,0,0,0.92), rgba(58,0,8,0.78))',
-                  borderRadius: 26,
-                  padding: isMobile ? '18px' : '26px',
+                  marginLeft: isMobile ? 0 : 'auto',
+                  fontSize: isMobile ? '1em' : '1.25em',
                   border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
-                  color: '#ffcfdf',
-                  boxShadow: '0 35px 65px rgba(0,0,0,0.45)',
+                  borderRadius: 18,
+                  padding: isMobile ? '0.4em 0.9em' : '0.5em 1.4em',
+                  background: 'linear-gradient(120deg, rgba(229,9,20,0.25), rgba(90,0,0,0.8))',
+                  width: isMobile ? '100%' : 'auto',
+                  textAlign: 'center',
+                  boxShadow: DUNGEON_THEME.glowPrimary,
                 }}
               >
-                <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout Results</div>
-                <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 4 }}>
-                  {getRingName('Wayne')} lasted: {shootoutTurns.Wayne || '-'} seconds
-                </div>
-                <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 10 }}>
-                  {getRingName('Cindy')} lasted: {shootoutTurns.Cindy || '-'} seconds
-                </div>
-                <div style={{ fontSize: '1em', marginBottom: 14 }}>
-                  Winner: {suddenDeathWinner === 'Tie' ? "It's a tie!" : suddenDeathWinner ? getRingName(suddenDeathWinner) : 'Pending'}
-                </div>
-                <div style={{ fontSize: '0.95em' }}>
-                  Unique Trophy for Winner:
-                  <div style={{ margin: '10px 0' }}>
-                    Choose a reward:
-                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-                      <li>1. Winner gets a legendary victory photo/video with the loser (full creative control)</li>
-                      <li>2. Loser must perform a dramatic entrance or exit for the winner</li>
-                      <li>3. Winner receives a personalized trophy or keepsake (physical or digital)</li>
-                      <li>4. Loser must give tribute to the winner (Winners Choice)</li>
-                      <li>5. Winner can create a new move or rule for future matches</li>
-                      <li>6. Loser must grant the winner a wish (within reason)</li>
-                      <li>7. Winner gets exclusive bragging rights and a special title until next Sudden Death match</li>
-                    </ul>
-                    <div style={{ fontStyle: 'italic', color: '#f0caff' }}>(Pick your favorite or invent your own!)</div>
-                  </div>
-                </div>
+                <span style={{ color: DUNGEON_THEME.neonPink, fontWeight: 700 }}>{timerBoxLabel}:</span> {timerBoxValue}
               </div>
             )}
           </div>
+        )}
+
+        <div style={stagePanelStyle}>
+          <div
+            style={{
+              position: 'absolute',
+              width: isMobile ? '220px' : '340px',
+              height: isMobile ? '220px' : '340px',
+              background: 'radial-gradient(circle, rgba(255,45,149,0.25), transparent 70%)',
+              top: '-80px',
+              right: '-60px',
+              filter: 'blur(20px)',
+              opacity: 0.7,
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              width: isMobile ? '280px' : '420px',
+              height: isMobile ? '280px' : '420px',
+              background: 'radial-gradient(circle, rgba(120,0,255,0.18), transparent 65%)',
+              bottom: '-120px',
+              left: '-80px',
+              filter: 'blur(25px)',
+              opacity: 0.8,
+              pointerEvents: 'none',
+            }}
+          />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={mainGridStyle}>
+              <div style={columnStackStyle}>
+                <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', flexWrap: 'wrap', gap: isMobile ? '16px' : '24px' }}>
+                  {players.map(player => {
+                    const maxHp = player.data.maxHp || 100;
+                    const hpPercent = Math.max(0, Math.round((player.data.hp / maxHp) * 100));
+                    return (
+                      <div
+                        key={player.key}
+                        style={{
+                          flex: isMobile ? '1 1 100%' : '1 1 320px',
+                          width: '100%',
+                          ...playerCardBase,
+                          border: `1px solid ${player.accent}55`,
+                          backdropFilter: 'blur(6px)',
+                        }}
+                      >
+                        <div
+                          style={{
+                            position: 'absolute',
+                            inset: 0,
+                            background: `linear-gradient(130deg, ${player.accent}22, transparent 65%)`,
+                            pointerEvents: 'none',
+                          }}
+                        />
+                        <div style={{ position: 'relative', zIndex: 1 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                            <span style={{ fontSize: isMobile ? '1.2em' : '1.4em', fontWeight: 700 }}>{player.label}</span>
+                            <span
+                              style={{
+                                fontSize: isMobile ? '0.85em' : '0.95em',
+                                letterSpacing: '0.12em',
+                                color: attacker === player.key ? DUNGEON_THEME.neonPink : DUNGEON_THEME.textMuted,
+                                border: attacker === player.key ? `1px solid ${DUNGEON_THEME.borderPrimary}` : '1px solid rgba(255,255,255,0.08)',
+                                borderRadius: 999,
+                                padding: '0.3em 1.1em',
+                                background: attacker === player.key ? 'rgba(255,45,149,0.08)' : 'rgba(255,255,255,0.04)',
+                              }}
+                            >
+                              {attacker === player.key ? 'ATTACKING' : 'DEFENDING'}
+                            </span>
+                          </div>
+                          <div style={{ height: 18, borderRadius: 999, background: 'rgba(255,255,255,0.1)', overflow: 'hidden', marginBottom: 12 }}>
+                            <div
+                              style={{
+                                width: `${hpPercent}%`,
+                                height: '100%',
+                                background: `linear-gradient(90deg, ${player.accent}, ${player.accent}aa)`,
+                                transition: 'width 0.35s ease',
+                                boxShadow: `0 0 18px ${player.accent}55`,
+                              }}
+                            />
+                          </div>
+                          <div style={{ fontSize: '1em', marginBottom: 6 }}>HP {player.data.hp} / {maxHp}</div>
+                          <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 6 }}>Stamina {player.data.stamina}</div>
+                          <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Submissions {submissions[player.key]}</div>
+                          <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Score {score[player.key]}</div>
+                          {player.clothing && (
+                            <div style={{ marginTop: 8, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>
+                              <span style={{ fontSize: '1.2em', marginRight: 6 }}>{player.clothing.icon}</span>
+                              {player.clothing.status}
+                            </div>
+                          )}
+                          {player.key === 'Wayne' && wayneStunned && (
+                            <div style={{ marginTop: 8, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>{getRingName('Wayne')} is stunned!</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {modeKey === 'suddendeath' && finalStand && (
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontSize: '0.95em',
+                      color: DUNGEON_THEME.ember,
+                    }}
+                  >
+                    Final Stand triggered! No more escapes.
+                  </div>
+                )}
+              </div>
+
+              <div style={columnStackStyle}>
+                <div style={attackerBadgeStyle}>
+                  <span style={{ fontSize: '0.85em', letterSpacing: '0.2em', textTransform: 'uppercase', color: DUNGEON_THEME.textMuted }}>Attacking</span>
+                  <span style={{ fontWeight: 700, color: '#fff' }}>{getRingName(attacker)}</span>
+                </div>
+                <div
+                  style={{
+                    background: DUNGEON_THEME.panel,
+                    borderRadius: 26,
+                    padding: isMobile ? '22px' : '30px',
+                    border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+                    boxShadow: '0 45px 80px rgba(0,0,0,0.45)',
+                  }}
+                >
+                  <div style={{ fontSize: isMobile ? '1.3em' : '1.6em', fontWeight: 700, marginBottom: 12 }}>Current Move</div>
+                  {move ? (
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        gap: isMobile ? '16px' : '28px',
+                        alignItems: 'stretch',
+                      }}
+                    >
+                      <div style={{ textAlign: 'left', flex: '2 1 320px' }}>
+                        <div style={{ fontSize: '1.35em', marginBottom: 6, color: '#fff' }}>{move.name}</div>
+                        <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>Type: {move.type}</div>
+                        <div style={{ fontSize: '1em', color: '#f0caff', marginBottom: 4 }}>
+                          Damage {move.damage} &bull; Cost {move.cost} &bull; Accuracy {move.accuracy}%
+                        </div>
+                        {move.special && (
+                          <div style={{ fontSize: '0.95em', color: DUNGEON_THEME.ember, marginBottom: 8 }}>Special: {move.special}</div>
+                        )}
+                        {currentMoveDetails?.description && (
+                          <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 8 }}>{currentMoveDetails.description}</div>
+                        )}
+                      </div>
+                      <div style={{ flex: '1 1 220px' }}>
+                        {moveImageSrc ? (
+                          <div
+                            onClick={() => setShowImageModal({
+                              name: move.name,
+                              image: currentMoveDetails.image,
+                              description: currentMoveDetails.description,
+                            })}
+                            style={{
+                              borderRadius: 18,
+                              overflow: 'hidden',
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              boxShadow: '0 25px 45px rgba(0,0,0,0.4)',
+                              cursor: 'pointer',
+                              position: 'relative',
+                            }}
+                          >
+                            <img
+                              src={moveImageSrc}
+                              alt={`${move.name} illustration`}
+                              style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                padding: '6px 10px',
+                                background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.65) 100%)',
+                                fontSize: '0.85em',
+                                letterSpacing: '0.08em',
+                                textTransform: 'uppercase',
+                              }}
+                            >
+                              Tap to enlarge
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              borderRadius: 18,
+                              border: '1px dashed rgba(255,255,255,0.2)',
+                              padding: '32px 18px',
+                              textAlign: 'center',
+                              color: DUNGEON_THEME.textMuted,
+                              fontSize: '0.95em',
+                            }}
+                          >
+                            Move art coming soon.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '1.1em', color: '#f0caff' }}>{moveStatusMessage}</div>
+                  )}
+                  {!move && !moveStatusMessage && (
+                    <div style={{ fontSize: '1.05em', color: '#f0caff', marginTop: 8 }}>Preparing next move...</div>
+                  )}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginTop: '18px', flexDirection: isMobile ? 'column' : 'row', width: '100%' }}>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={actionDisabled}
+                      style={{
+                        ...primaryButtonBase,
+                        border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+                        background: actionDisabled
+                          ? 'rgba(255,255,255,0.08)'
+                          : 'linear-gradient(120deg, #e50914 0%, #3f0005 100%)',
+                        color: '#fff',
+                        cursor: actionDisabled ? 'not-allowed' : 'pointer',
+                        boxShadow: actionDisabled ? 'none' : '0 25px 55px rgba(229,9,20,0.38)',
+                      }}
+                    >
+                      {submitted ? 'Resolving...' : isStrikeMove ? 'Next Move' : 'Submit Move'}
+                    </button>
+                    {!isStrikeMove && (
+                      <button
+                        onClick={handleEscape}
+                        disabled={actionDisabled}
+                        style={{
+                          ...primaryButtonBase,
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          background: actionDisabled
+                            ? 'rgba(255,255,255,0.04)'
+                            : 'linear-gradient(120deg, rgba(255,255,255,0.08), rgba(0,0,0,0.55))',
+                          color: '#fff',
+                          cursor: actionDisabled ? 'not-allowed' : 'pointer',
+                          boxShadow: actionDisabled ? 'none' : '0 15px 35px rgba(0,0,0,0.45)',
+                        }}
+                      >
+                        Escape Move
+                      </button>
+                    )}
+                    <button
+                      onClick={nextTurn}
+                      disabled={submitted || showCoinFlip || Boolean(matchWinner)}
+                      style={{
+                        ...primaryButtonBase,
+                        border: `1px solid ${DUNGEON_THEME.borderSecondary}`,
+                        background: 'rgba(255,255,255,0.06)',
+                        color: '#fff',
+                        cursor: submitted || showCoinFlip || matchWinner ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 15px 35px rgba(0,0,0,0.35)',
+                      }}
+                    >
+                      Force Next Turn
+                    </button>
+                  </div>
+                  {isStrikeMove && (
+                    <div style={{ marginTop: 6, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>
+                      Strikes cannot be escaped — tap Next Move to resolve the blow.
+                    </div>
+                  )}
+                  <div style={{ marginTop: 14, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>{deckSummary}</div>
+                  {moveStatusMessage && move && (
+                    <div style={{ marginTop: 6, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>{moveStatusMessage}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {modeKey === 'suddendeath' && finalStand && (
+          <div
+            style={{
+              background: 'linear-gradient(160deg, rgba(24,0,0,0.92), rgba(58,0,8,0.78))',
+              borderRadius: 26,
+              padding: isMobile ? '18px' : '26px',
+              border: `1px solid ${DUNGEON_THEME.borderPrimary}`,
+              color: '#ffcfdf',
+              boxShadow: '0 35px 65px rgba(0,0,0,0.45)',
+            }}
+          >
+            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout Results</div>
+            <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 4 }}>
+              {getRingName('Wayne')} lasted: {shootoutTurns.Wayne || '-'} seconds
+            </div>
+            <div style={{ fontSize: '0.95em', color: '#f7e1ff', marginBottom: 10 }}>
+              {getRingName('Cindy')} lasted: {shootoutTurns.Cindy || '-'} seconds
+            </div>
+            <div style={{ fontSize: '1em', marginBottom: 14 }}>
+              Winner: {suddenDeathWinner === 'Tie' ? "It's a tie!" : suddenDeathWinner ? getRingName(suddenDeathWinner) : 'Pending'}
+            </div>
+            <div style={{ fontSize: '0.95em' }}>
+              Unique Trophy for Winner:
+              <div style={{ margin: '10px 0' }}>
+                Choose a reward:
+                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                  <li>1. Winner gets a legendary victory photo/video with the loser (full creative control)</li>
+                  <li>2. Loser must perform a dramatic entrance or exit for the winner</li>
+                  <li>3. Winner receives a personalized trophy or keepsake (physical or digital)</li>
+                  <li>4. Loser must give tribute to the winner (Winners Choice)</li>
+                  <li>5. Winner can create a new move or rule for future matches</li>
+                  <li>6. Loser must grant the winner a wish (within reason)</li>
+                  <li>7. Winner gets exclusive bragging rights and a special title until next Sudden Death match</li>
+                </ul>
+                <div style={{ fontStyle: 'italic', color: '#f0caff' }}>(Pick your favorite or invent your own!)</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {matchWinner && (
@@ -1364,6 +1517,7 @@ function GameEngine({ modeKey, enabledMoves }) {
             justifyContent: 'center',
             padding: isMobile ? '20px' : '32px',
             backdropFilter: 'blur(6px)',
+            overflowY: 'auto',
           }}
         >
           <div
@@ -1377,6 +1531,8 @@ function GameEngine({ modeKey, enabledMoves }) {
               boxShadow: '0 40px 90px rgba(0,0,0,0.65)',
               position: 'relative',
               color: '#ffe9ff',
+              maxHeight: isMobile ? '90vh' : '85vh',
+              overflowY: 'auto',
             }}
           >
             <img
@@ -1410,6 +1566,29 @@ function GameEngine({ modeKey, enabledMoves }) {
               <div>{getRingName('Wayne')} HP {Math.max(0, wayne.hp)} • {getRingName('Cindy')} HP {Math.max(0, cindy.hp)}</div>
               <div>Submissions — {getRingName('Wayne')} {submissions.Wayne} / {getRingName('Cindy')} {submissions.Cindy}</div>
             </div>
+            {matchLog.length > 0 && (
+              <div
+                style={{
+                  maxHeight: isMobile ? '200px' : '240px',
+                  overflowY: 'auto',
+                  textAlign: 'left',
+                  background: 'rgba(255,255,255,0.03)',
+                  borderRadius: 18,
+                  padding: '14px 18px',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  marginBottom: 24,
+                }}
+              >
+                <div style={{ fontWeight: 700, marginBottom: 8 }}>Match Log</div>
+                <ol style={{ margin: 0, paddingLeft: '1.4em', fontSize: '0.95em', color: '#ffe9ff' }}>
+                  {matchLog.map((entry, idx) => (
+                    <li key={`${entry}-${idx}`} style={{ marginBottom: 6 }}>
+                      {entry}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
             <div
               style={{
                 display: 'flex',
