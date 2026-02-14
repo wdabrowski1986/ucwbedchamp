@@ -116,38 +116,38 @@ function getRingName(key) {
 
 const VICTORY_TALES = {
   default: [
-    ({ winner, loser }) => `${winner} presses ${loser}'s lips to their thigh and refuses to release until every inch is worshipped.`,
-    ({ winner, loser }) => `${winner} straddles the mattress throne while ${loser} kneads tired muscles and murmurs praises.`,
-    ({ winner, loser }) => `${winner} knots ${loser} in satin sheets and orders a slow trail of kisses from ankle to hip.`,
-    ({ winner, loser }) => `${winner} hooks ${loser}'s wrists overhead and makes them chant devotion between each kiss.`,
-    ({ winner, loser }) => `${winner} lounges with one heel on ${loser}'s back, guiding their mouth wherever worship is owed.`,
-    ({ winner, loser }) => `${winner} keeps ${loser} kneeling and counts down points while they kiss along every muscle.`,
-    ({ winner, loser }) => `${winner} blindfolds ${loser} and demands worship by touch alone until the tremors stop.`,
-    ({ winner, loser }) => `${winner} pulls ${loser} into their lap and makes them whisper gratitude for each earned bruise.`,
-    ({ winner, loser, scoreLine }) => `${winner} taps the ${scoreLine} scoreboard and commands ${loser} to kiss from toes to lips for every digit.`,
-    ({ winner, loser, submissionLine }) => `${winner} makes ${loser} count the ${submissionLine} submission edge with kisses pressed to their arches.`,
+    ({ winner, loser }) => `${winner} pushes ${loser} down onto the sheets and straddles them, lips dragging across their neck while they whisper "say my name."`,
+    ({ winner, loser }) => `${winner} pins ${loser} face-down on the mattress, grinding slow against their back while pulling their hair and breathing "you're mine tonight."`,
+    ({ winner, loser }) => `${winner} wraps ${loser} in the sheets with just their mouth exposed, then kisses every inch from jaw to navel — taking their sweet time.`,
+    ({ winner, loser }) => `${winner} hooks ${loser}'s wrists to the headboard and traces a single fingertip down their bare skin until they're shaking and begging.`,
+    ({ winner, loser }) => `${winner} sits on the edge of the bed while ${loser} kneels between their thighs, pressing lips to every curve and whispering how good they taste.`,
+    ({ winner, loser }) => `${winner} blindfolds ${loser} and runs an ice cube from their throat down to their hips — then follows the wet trail with their tongue.`,
+    ({ winner, loser }) => `${winner} pulls ${loser} into their lap face-to-face, grinding slowly, and won't let them look away while they moan.`,
+    ({ winner, loser, scoreLine }) => `${winner} writes the ${scoreLine} score on ${loser}'s skin with their tongue — one digit at a time, painfully slow.`,
+    ({ winner, loser, submissionLine }) => `${winner} makes ${loser} count each of the ${submissionLine} submissions out loud — and earns a kiss lower and lower for every number.`,
+    ({ winner, loser }) => `${winner} lays ${loser} flat on the mattress, licks their lips, and crawls on top — "I'm going to enjoy this."`,
   ],
   modes: {
     suddendeath: [
-      ({ winner, loser }) => `${winner} freezes ${loser} in the finisher pose and makes them worship the limb that trapped them.`,
-      ({ winner, loser }) => `${winner} marches ${loser} around the mattress, forcing kisses on every bruised spot from the choke-out.`,
+      ({ winner, loser }) => `${winner} holds the finisher and whispers "beg for it" while ${loser} trembles and moans beneath them.`,
+      ({ winner, loser }) => `${winner} doesn't release the hold — they just press harder, grinding against ${loser} until surrendering becomes pleasure.`,
     ],
     ironwoman: [
-      ({ winner, loser }) => `${winner} makes ${loser} recite every Iron Woman minute while kissing sweat-soaked skin.`,
-      ({ winner, loser }) => `${winner} seats ${loser} at their feet and demands calf-to-hip worship for surviving the clock.`,
+      ({ winner, loser }) => `${winner} peels the last stitch of clothing off ${loser} with their teeth, then makes them crawl to the edge of the bed to worship.`,
+      ({ winner, loser }) => `${winner} presses their sweat-slicked body against ${loser} and whispers every filthy minute into their ear until they're throbbing.`,
     ],
     eroticfight: [
-      ({ winner, loser, scoreLine }) => `${winner} spritzes the scoreboard (${scoreLine}) and makes ${loser} lick every droplet from their torso.`,
-      ({ winner, loser }) => `${loser} recites the orgasm tally on their knees while ${winner} steers their mouth wherever they please.`,
+      ({ winner, loser, scoreLine }) => `${winner} traces the ${scoreLine} on ${loser}'s inner thigh with their tongue and whispers "that's how many times I made you scream."`,
+      ({ winner, loser }) => `${loser} is still shaking from the last orgasm when ${winner} pushes them back down — "we're not done."`,
     ],
     quick: [
-      ({ winner, loser }) => `${winner} snaps fingers and orders ${loser} back to stance so they can worship between sprints.`,
-      ({ winner, loser }) => `${winner} keeps ${loser} braced on the posts kissing their knuckles before the next rush.`,
+      ({ winner, loser }) => `${winner} barely breaks a sweat — just grabs ${loser}, kisses them hard, and whispers "too easy, baby."`,
+      ({ winner, loser }) => `${winner} pins ${loser} against the headboard and takes their time kissing down their body — fast match, slow reward.`,
     ],
   },
   finisher: [
-    ({ winner, loser }) => `${winner} eases out of the finishing hold just enough to force kisses along the limb that sealed it.`,
-    ({ winner, loser }) => `${loser} trembles while ${winner} guides their mouth along the path of the finisher.`,
+    ({ winner, loser }) => `${winner} holds the finishing lock just long enough to feel ${loser}'s body go limp with pleasure — then slowly releases, dragging lips across their skin.`,
+    ({ winner, loser }) => `${loser}'s body trembles as ${winner} whispers "you feel that?" — mouth still pressed against the skin that sealed the win.`,
   ],
 };
 
@@ -246,36 +246,40 @@ function resolveModeTiebreaker(modeKey, state) {
 }
 
 const TIE_TALES = [
-  () => 'Both lovers collapse in a knot of limbs — no one owns the bed tonight.',
-  () => 'They sprawl side by side and promise to make each other worship harder in the rematch.',
+  () => 'Both collapse in a tangle of naked limbs, breathing hard — neither willing to stop touching the other long enough to declare a winner.',
+  () => 'They lay chest-to-chest, skin damp, hearts pounding, whispering promises about what the rematch will earn the winner.',
   ({ modeKey }) => modeKey === 'ironwoman'
-    ? 'Hours melt away with neither warrior breaking — the clock surrenders instead.'
-    : 'The arena lights dim while they agree the next bout decides everything.',
+    ? 'Hours of sweat and skin and moaning — and neither would say quit. They lay tangled, still grinding, too turned on to stop.'
+    : 'The lights dim. They\'re still wrapped around each other. Nobody wants to let go.',
 ];
 
 const WIN_HEADLINES = [
-  ({ winner }) => `${winner} Rules the Bed`,
-  ({ winner }) => `${winner}'s Velvet Reign`,
-  ({ winner }) => `${winner} Claims the Crimson Crown`,
+  ({ winner }) => `${winner} Owns the Bed Tonight`,
+  ({ winner }) => `${winner}'s Body Rules`,
+  ({ winner }) => `${winner} Takes Everything`,
+  ({ winner }) => `Bow Down to ${winner}`,
+  ({ winner }) => `${winner} Gets What They Want`,
 ];
 
 const WIN_SUBHEADINGS = [
-  ({ winner, loser }) => `${winner} plants ${loser} between their knees and demands worship as tribute.`,
-  ({ winner, loser, scoreLine }) => `${winner} dominates ${loser} ${scoreLine} and makes them whisper praise between every breath.`,
-  ({ winner, loser, submissionLine }) => `${winner} rides a ${submissionLine} submission edge and turns ${loser} into a trembling worshipper.`,
+  ({ winner, loser }) => `${winner} shoves ${loser} onto the sheets and climbs on top — "You belong to me now."`,
+  ({ winner, loser, scoreLine }) => `${winner} dominated ${loser} ${scoreLine} — and plans to collect slowly, with their mouth.`,
+  ({ winner, loser, submissionLine }) => `${winner} rode ${loser} into ${submissionLine} submissions — and now the real punishment begins.`,
+  ({ winner, loser }) => `${winner} grabs ${loser} by the chin, leans in close, and whispers exactly what's coming next.`,
 ];
 
 const TIE_HEADLINES = [
-  () => 'Velvet Deadlock',
-  () => 'Double Knockout',
-  () => 'Devotion Deferred',
+  () => 'Too Hot to Stop',
+  () => 'Neither Taps Out',
+  () => 'Mutual Surrender',
+  () => 'Bodies Locked, Nobody Breaks',
 ];
 
 const TIE_SUBHEADINGS = [
   ({ modeKey }) => modeKey === 'ironwoman'
-    ? 'The Iron Woman clock quits before either fighter does.'
-    : 'No throne claimed — both lovers collapse before anyone can demand worship.',
-  () => 'Sweat, silk, and stalemate — devotion postponed.',
+    ? 'The clock ran out but they\'re still tangled up, skin on skin, breathing heavy.'
+    : 'Neither would submit — so they\'ll just have to keep going until someone breaks.',
+  () => 'Sweat-soaked and trembling — both too turned on to declare a winner.',
 ];
 
 function pickTemplate(templates, context) {
@@ -358,10 +362,10 @@ function GameEngine({ modeKey, enabledMoves }) {
         setScore(s => ({ ...s, [attacker]: (s[attacker] ?? 0) + 1 }));
         if (sdPendingAnswer === null) {
           setSdPendingAnswer(attacker);
-          postMatchMessage(`${attackerName} locks in ${move.name} and scores! ${defenderName} must answer!`);
+          postMatchMessage(`${attackerName} locks in ${move.name} and makes them submit! 🔥 ${defenderName} has to answer or it's over!`);
         } else {
           setSdPendingAnswer(null);
-          postMatchMessage(`${attackerName} answers with ${move.name}! Scores are even — the shootout continues!`);
+          postMatchMessage(`${attackerName} fires back with ${move.name}! 💥 Even score — the shootout keeps going!`);
         }
         setTimeout(nextTurn, 1200);
         return;
@@ -376,7 +380,7 @@ function GameEngine({ modeKey, enabledMoves }) {
         } else {
           setCindy(prev => ({ ...prev, hp: Math.max(0, prev.hp - damageValue) }));
         }
-        damageMessage = `${attackerName} landed ${move.name} for ${damageValue} damage.`;
+        damageMessage = `${attackerName} hit ${move.name} — ${damageValue} to their body. They felt that. 😈`;
       } else if (damageValue < 0) {
         const healAmount = Math.abs(damageValue);
         if (attacker === 'Wayne') {
@@ -384,7 +388,7 @@ function GameEngine({ modeKey, enabledMoves }) {
         } else {
           setCindy(prev => ({ ...prev, hp: Math.min(prev.maxHp || 100, prev.hp + healAmount) }));
         }
-        damageMessage = `${attackerName} used ${move.name} and restored ${healAmount} HP.`;
+        damageMessage = `${attackerName} used ${move.name} — restored ${healAmount} endurance. Slow, tender, delicious.`;
       }
 
       const causesSubmission = move.type ? SUBMISSION_TYPES.has(move.type) : false;
@@ -399,12 +403,12 @@ function GameEngine({ modeKey, enabledMoves }) {
           [attacker]: (scoreboard[attacker] ?? 0) + 1,
         }));
         finalMessage = damageMessage
-          ? `${attackerName} performed ${move.name} and scored a submission! ${damageMessage}`
-          : `${attackerName} performed ${move.name} and scored a submission!`;
+          ? `${attackerName} locked in ${move.name} — they submitted! 🥵 ${damageMessage}`
+          : `${attackerName} pulled ${move.name} and made them tap! 🥵`;
       } else if (damageMessage) {
         finalMessage = damageMessage;
       } else {
-        finalMessage = `${attackerName} performed ${move.name}.`;
+        finalMessage = `${attackerName} used ${move.name}... and enjoyed every second.`;
       }
 
       postMatchMessage(finalMessage);
@@ -429,13 +433,13 @@ function GameEngine({ modeKey, enabledMoves }) {
 
       // Sudden Death Shootout: if pending answer and answering player's finisher was escaped, they lose
       if (modeKey === 'suddendeath' && sdPendingAnswer !== null && sdPendingAnswer !== attacker) {
-        postMatchMessage(`${defenderName} escapes ${move.name}! ${getRingName(sdPendingAnswer)} wins the shootout!`);
+        postMatchMessage(`${defenderName} fights out of ${move.name}! ${getRingName(sdPendingAnswer)} wins — they couldn't answer! 👑`);
         setSuddenDeathWinner(sdPendingAnswer);
         setTimeout(nextTurn, 1200);
         return;
       }
 
-      postMatchMessage(`${defenderName} escapes ${move.name} — the worship session will have to wait!`);
+      postMatchMessage(`${defenderName} slips out of ${move.name} — not this time, baby! 💪`);
       setTimeout(nextTurn, 1200);
     }
   const [attacker, setAttacker] = useState(rollAttacker);
@@ -759,8 +763,8 @@ function GameEngine({ modeKey, enabledMoves }) {
           submissionLine,
         };
         const worshipLine = winner === 'Wayne'
-          ? `${getRingName('Cindy')} worships ${getRingName('Wayne')} in Titan reverence.`
-          : `${getRingName('Wayne')} kneels to worship ${getRingName('Cindy')} the Goddess.`;
+          ? `${getRingName('Cindy')} gets on her knees for ${getRingName('Wayne')} — he earned every kiss.`
+          : `${getRingName('Wayne')} kneels before ${getRingName('Cindy')} — she owns him tonight.`;
         const addWorshipTag = base => `${base ? `${base} ` : ''}${worshipLine}`.trim();
         setVictoryHeading(pickTemplate(WIN_HEADLINES, context));
         if (appliedTiebreaker) {
@@ -781,13 +785,13 @@ function GameEngine({ modeKey, enabledMoves }) {
   let ironWomanClothing = null;
   if (modeKey === 'ironwoman') {
     if (timer < 300) {
-      ironWomanClothing = { icon: '👗', status: 'FULLY DRESSED' };
+      ironWomanClothing = { icon: '👗', status: 'STILL DRESSED... FOR NOW' };
     } else if (timer < 600) {
-      ironWomanClothing = { icon: '🎀', status: 'PARTIALLY UNDRESSED' };
+      ironWomanClothing = { icon: '🎀', status: 'CLOTHES COMING OFF' };
     } else if (timer < 900) {
-      ironWomanClothing = { icon: '👙', status: 'UNDERWEAR ONLY' };
+      ironWomanClothing = { icon: '👙', status: 'BARELY COVERED' };
     } else {
-      ironWomanClothing = { icon: '💋', status: 'NUDE' };
+      ironWomanClothing = { icon: '💋', status: 'COMPLETELY NAKED' };
     }
   }
   const wayneClothing = modeKey === 'quick' ? null : modeKey === 'ironwoman' ? ironWomanClothing : getClothingLayer(wayne.hp);
@@ -815,17 +819,17 @@ function GameEngine({ modeKey, enabledMoves }) {
   const timerDisplay = showTimerBox ? timerBoxValue : 'Open Play';
   let moveStatusMessage = '';
   if (enabledMoves.length === 0) {
-    moveStatusMessage = 'All moves are disabled. Enable at least one move in Move Settings.';
+    moveStatusMessage = 'Your move deck is empty, lover. Turn on some moves in Move Settings. 😉';
   } else if (!attackerHasConfiguredMoves) {
-    moveStatusMessage = `${getRingName(attacker)} has no eligible moves with the current Move Settings.`;
+    moveStatusMessage = `${getRingName(attacker)} has nothing to work with right now. Fix those Move Settings, babe.`;
   } else if (modeKey === 'suddendeath' && !deckHasFinisher) {
-    moveStatusMessage = 'Sudden Death needs at least one Finisher for the active attacker.';
+    moveStatusMessage = 'Sudden Death needs finishers enabled. Turn one on so you can finish them off. 😈';
   } else if (modeKey === 'quick' && !deckHasNonSensual) {
-    moveStatusMessage = 'Quick Match blocks Sensual moves. Enable a Physical, Strike, or Challenge move.';
+    moveStatusMessage = 'Quick Match is too fast for sensual moves. Enable something physical, baby.';
   } else if (moveDeck.length === 0) {
-    moveStatusMessage = 'Shuffling move deck...';
+    moveStatusMessage = 'Shuffling the deck... get ready. 🔥';
   } else if (!move) {
-    moveStatusMessage = 'Drawing the next move...';
+    moveStatusMessage = 'Drawing your next move... 😏';
   }
   const deckSummary = attackerHasConfiguredMoves
     ? `${attackerPool.length} move${attackerPool.length === 1 ? '' : 's'} available for ${getRingName(attacker)}`
@@ -922,14 +926,14 @@ function GameEngine({ modeKey, enabledMoves }) {
   const decoratedWinner = matchWinner && matchWinner !== 'Tie' ? getRingName(matchWinner) : matchWinner;
   const decoratedLoser = victoryLoser ? getRingName(victoryLoser) : null;
   const overlayHeading = victoryHeading || (matchWinner === 'Tie'
-    ? 'Velvet Deadlock'
+    ? 'Too Hot to Stop'
     : decoratedWinner
-      ? `${decoratedWinner} Rules the Bed`
+      ? `${decoratedWinner} Owns the Bed`
       : '');
   const overlaySubheading = victorySubheading || (matchWinner === 'Tie'
-    ? 'Devotion deferred — both lovers collapse before they can force worship.'
+    ? 'Neither would give in — both still tangled up, breathing hard, wanting more.'
     : decoratedWinner && decoratedLoser
-      ? `${decoratedWinner} keeps ${decoratedLoser} kneeling and demanding worship for every bruise.`
+      ? `${decoratedWinner} pins ${decoratedLoser} down and takes what they earned — slowly.`
       : '');
 
   // Erotic Fight Mode: Only show special UI
@@ -1002,7 +1006,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               textAlign: 'center',
             }}
           >
-            <span style={{ fontFamily: '"UnifrakturCook", "Cinzel", serif' }}>Drain Each Other</span>
+            <span style={{ fontFamily: '"UnifrakturCook", "Cinzel", serif' }}>Make Each Other Scream</span>
           </div>
           <div
             style={{
@@ -1113,7 +1117,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               textAlign: 'center',
             }}
           >
-            <span>UCW BedChamp &bull; Erotic Wrestling</span>
+            <span>UCW BedChamp &bull; Bodies. Pleasure. Domination.</span>
           </div>
         </div>
       </div>
@@ -1176,8 +1180,8 @@ function GameEngine({ modeKey, enabledMoves }) {
               boxShadow: '0 0 45px rgba(255,45,149,0.45)',
             }}
           >
-            <div style={{ fontSize: isMobile ? '1.6em' : '2em', fontWeight: 700, marginBottom: 12, color: '#fff' }}>Coin Flip</div>
-            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', color: DUNGEON_THEME.textMuted }}>{getRingName(coinFlipResult)} attacks first!</div>
+            <div style={{ fontSize: isMobile ? '1.6em' : '2em', fontWeight: 700, marginBottom: 12, color: '#fff' }}>Who Goes First?</div>
+            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', color: DUNGEON_THEME.textMuted }}>{getRingName(coinFlipResult)} gets to have their way first... 💋</div>
           </div>
         </div>
       )}
@@ -1193,12 +1197,12 @@ function GameEngine({ modeKey, enabledMoves }) {
               marginBottom: 12,
             }}
           >
-            <div style={{ fontSize: '0.85em', letterSpacing: '0.35em', textTransform: 'uppercase', color: '#ff9fbb' }}>Velvet Scoreboard</div>
+            <div style={{ fontSize: '0.85em', letterSpacing: '0.35em', textTransform: 'uppercase', color: '#ff9fbb' }}>Pleasure Scoreboard</div>
             <div style={{ fontSize: '1em', letterSpacing: '0.18em', color: DUNGEON_THEME.textMuted }}>Round {round}</div>
           </div>
           <div style={scoreMetricsRowStyle}>
             <div style={{ ...scoreMetricStyle, border: `1px solid ${DUNGEON_THEME.borderPrimary}` }}>
-              <div style={metricLabelStyle}>Points</div>
+              <div style={metricLabelStyle}>Pleasure Points</div>
               <div style={{ ...metricValueStyle, color: DUNGEON_THEME.neonPink }}>
                 {getRingName('Wayne')} {score.Wayne} • {getRingName('Cindy')} {score.Cindy}
               </div>
@@ -1336,10 +1340,10 @@ function GameEngine({ modeKey, enabledMoves }) {
                               }}
                             />
                           </div>
-                          <div style={{ fontSize: '1em', marginBottom: 6 }}>HP {player.data.hp} / {maxHp}</div>
+                          <div style={{ fontSize: '1em', marginBottom: 6 }}>Endurance {player.data.hp} / {maxHp}</div>
                           <div style={{ fontSize: '0.95em', color: '#d7d7ff', marginBottom: 6 }}>Stamina {player.data.stamina}</div>
-                          <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Submissions {submissions[player.key]}</div>
-                          <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Score {score[player.key]}</div>
+                          <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Times Submitted 🥵 {submissions[player.key]}</div>
+                          <div style={{ fontSize: '0.95em', marginBottom: 6 }}>Pleasure {score[player.key]}</div>
                           {player.clothing && (
                             <div style={{ marginTop: 8, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>
                               <span style={{ fontSize: '1.2em', marginRight: 6 }}>{player.clothing.icon}</span>
@@ -1364,18 +1368,18 @@ function GameEngine({ modeKey, enabledMoves }) {
                     }}
                   >
                     {sdPendingAnswer
-                      ? `${getRingName(sdPendingAnswer)} scored! ${getRingName(sdPendingAnswer === 'Wayne' ? 'Cindy' : 'Wayne')} must answer!`
+                      ? `🔥 ${getRingName(sdPendingAnswer)} made them submit! ${getRingName(sdPendingAnswer === 'Wayne' ? 'Cindy' : 'Wayne')} — answer or it's over!`
                       : submissions.Wayne === 0 && submissions.Cindy === 0
-                        ? 'Shootout — first finisher submission starts the challenge.'
-                        : 'Scores are even. Next submission starts a new challenge.'}
+                        ? 'Shootout — land a finisher and make them beg. 😈'
+                        : 'Tied up. Next finisher starts a fresh challenge. 🔥'}
                   </div>
                 )}
               </div>
 
               <div style={columnStackStyle}>
                 <div style={attackerBadgeStyle}>
-                  <span style={{ fontSize: '0.85em', letterSpacing: '0.2em', textTransform: 'uppercase', color: DUNGEON_THEME.textMuted }}>Attacking</span>
-                  <span style={{ fontWeight: 700, color: '#fff' }}>{getRingName(attacker)}</span>
+                  <span style={{ fontSize: '0.85em', letterSpacing: '0.2em', textTransform: 'uppercase', color: DUNGEON_THEME.textMuted }}>On Top</span>
+                  <span style={{ fontWeight: 700, color: '#fff' }}>{getRingName(attacker)} 💋</span>
                 </div>
                 <div
                   style={{
@@ -1386,7 +1390,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                     boxShadow: '0 45px 80px rgba(0,0,0,0.45)',
                   }}
                 >
-                  <div style={{ fontSize: isMobile ? '1.3em' : '1.6em', fontWeight: 700, marginBottom: 12 }}>Current Move</div>
+                  <div style={{ fontSize: isMobile ? '1.3em' : '1.6em', fontWeight: 700, marginBottom: 12 }}>What They're Doing To You...</div>
                   {move ? (
                     <div
                       style={{
@@ -1444,7 +1448,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                                 textTransform: 'uppercase',
                               }}
                             >
-                              Tap to enlarge
+                              Tap to see more 👀
                             </div>
                           </div>
                         ) : (
@@ -1458,7 +1462,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                               fontSize: '0.95em',
                             }}
                           >
-                            Move art coming soon.
+                            Picture coming soon... use your imagination 😏
                           </div>
                         )}
                       </div>
@@ -1484,7 +1488,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                         boxShadow: actionDisabled ? 'none' : '0 25px 55px rgba(229,9,20,0.38)',
                       }}
                     >
-                      {submitted ? 'Resolving...' : isStrikeMove ? 'Next Move' : 'Submit Move'}
+                      {submitted ? 'Giving in...' : isStrikeMove ? 'Take It 💥' : 'Submit... 🥵'}
                     </button>
                     {!isStrikeMove && (
                       <button
@@ -1501,7 +1505,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                           boxShadow: actionDisabled ? 'none' : '0 15px 35px rgba(0,0,0,0.45)',
                         }}
                       >
-                        Escape Move
+                        Fight Back 💪
                       </button>
                     )}
                     <button
@@ -1516,7 +1520,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                         boxShadow: '0 15px 35px rgba(0,0,0,0.35)',
                       }}
                     >
-                      Force Next Turn
+                      Switch It Up
                     </button>
                   </div>
                   {modeKey === 'ironwoman' && !matchWinner && (
@@ -1524,7 +1528,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                       <button
                         onClick={() => {
                           setIronWomanWinner('Cindy');
-                          postMatchMessage(`${getRingName('Wayne')} screams I QUIT! ${getRingName('Cindy')} wins the Iron Woman!`);
+                          postMatchMessage(`${getRingName('Wayne')} can't take any more! 🥵 ${getRingName('Cindy')} breaks him — she wins the Iron Woman! 👑`);
                         }}
                         style={{
                           ...primaryButtonBase,
@@ -1537,12 +1541,12 @@ function GameEngine({ modeKey, enabledMoves }) {
                           fontSize: isMobile ? '0.95em' : '1.05em',
                         }}
                       >
-                        {getRingName('Wayne')} Quits
+                        🚨 {getRingName('Wayne')} Can't Take It
                       </button>
                       <button
                         onClick={() => {
                           setIronWomanWinner('Wayne');
-                          postMatchMessage(`${getRingName('Cindy')} screams I QUIT! ${getRingName('Wayne')} wins the Iron Woman!`);
+                          postMatchMessage(`${getRingName('Cindy')} can't take any more! 🥵 ${getRingName('Wayne')} breaks her — he wins the Iron Woman! 👑`);
                         }}
                         style={{
                           ...primaryButtonBase,
@@ -1555,13 +1559,13 @@ function GameEngine({ modeKey, enabledMoves }) {
                           fontSize: isMobile ? '0.95em' : '1.05em',
                         }}
                       >
-                        {getRingName('Cindy')} Quits
+                        🚨 {getRingName('Cindy')} Can't Take It
                       </button>
                     </div>
                   )}
                   {isStrikeMove && (
                     <div style={{ marginTop: 6, fontSize: '0.9em', color: DUNGEON_THEME.ember }}>
-                      Strikes cannot be escaped — tap Next Move to resolve the blow.
+                      No escaping this one — you just have to take it. 😈
                     </div>
                   )}
                   <div style={{ marginTop: 14, fontSize: '0.95em', color: DUNGEON_THEME.textMuted }}>{deckSummary}</div>
@@ -1585,7 +1589,7 @@ function GameEngine({ modeKey, enabledMoves }) {
               boxShadow: '0 35px 65px rgba(0,0,0,0.45)',
             }}
           >
-            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout</div>
+            <div style={{ fontSize: isMobile ? '1.1em' : '1.35em', fontWeight: 'bold', marginBottom: 12 }}>Sudden Death Shootout 🔥</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 12 }}>
               <div style={{ fontSize: '1em', color: '#f7e1ff' }}>
                 {getRingName('Wayne')}: {submissions.Wayne} submission{submissions.Wayne !== 1 ? 's' : ''}
@@ -1596,13 +1600,13 @@ function GameEngine({ modeKey, enabledMoves }) {
             </div>
             <div style={{ fontSize: '1em', marginBottom: 10, color: sdPendingAnswer ? DUNGEON_THEME.ember : '#f0caff', fontWeight: sdPendingAnswer ? 700 : 400 }}>
               {sdPendingAnswer
-                ? `${getRingName(sdPendingAnswer)} scored! ${getRingName(sdPendingAnswer === 'Wayne' ? 'Cindy' : 'Wayne')} must answer or lose!`
+                ? `${getRingName(sdPendingAnswer)} scored! ${getRingName(sdPendingAnswer === 'Wayne' ? 'Cindy' : 'Wayne')} — answer or get owned!`
                 : submissions.Wayne === 0 && submissions.Cindy === 0
-                  ? 'Waiting for the first finisher submission...'
-                  : 'Even — next submission starts a new challenge.'}
+                  ? 'Waiting for the first finisher... who breaks first? 😏'
+                  : 'Even — next submission starts a new round of pleasure.'}
             </div>
             <div style={{ fontSize: '0.9em', color: DUNGEON_THEME.textMuted, fontStyle: 'italic' }}>
-              Land a finisher → opponent must answer with one of their own. Fail to answer? You lose.
+              Lock in a finisher → they have to answer with their own, or they lose. Simple. Brutal. Sexy. 😈
             </div>
           </div>
         )}
@@ -1649,7 +1653,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                 filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.5))',
               }}
             />
-            <div style={{ fontSize: isMobile ? '0.95em' : '1.05em', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#ff9fbb', marginBottom: 12 }}>Bed Champion Crowned</div>
+            <div style={{ fontSize: isMobile ? '0.95em' : '1.05em', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#ff9fbb', marginBottom: 12 }}>👑 Bed Champion 👑</div>
             <div style={{ fontSize: isMobile ? '2em' : '2.6em', fontWeight: 700, marginBottom: 8 }}>{overlayHeading}</div>
             <div style={{ fontSize: isMobile ? '1.05em' : '1.2em', color: '#ffd6ff', marginBottom: 18 }}>{overlaySubheading}</div>
             <div style={{ fontSize: '0.95em', color: '#fdd5ff', marginBottom: 20 }}>{victoryQuote}</div>
@@ -1666,8 +1670,8 @@ function GameEngine({ modeKey, enabledMoves }) {
                 marginBottom: 24,
               }}
             >
-              <div>{getRingName('Wayne')} HP {Math.max(0, wayne.hp)} • {getRingName('Cindy')} HP {Math.max(0, cindy.hp)}</div>
-              <div>Submissions — {getRingName('Wayne')} {submissions.Wayne} / {getRingName('Cindy')} {submissions.Cindy}</div>
+              <div>{getRingName('Wayne')} Endurance {Math.max(0, wayne.hp)} • {getRingName('Cindy')} Endurance {Math.max(0, cindy.hp)}</div>
+              <div>Times Submitted 🥵 — {getRingName('Wayne')} {submissions.Wayne} / {getRingName('Cindy')} {submissions.Cindy}</div>
             </div>
             {matchLog.length > 0 && (
               <div
@@ -1717,7 +1721,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                   flex: '1 1 auto',
                 }}
               >
-                Rematch
+                Go Again 🔥
               </button>
               <button
                 onClick={() => {
@@ -1738,7 +1742,7 @@ function GameEngine({ modeKey, enabledMoves }) {
                   flex: isMobile ? '1 1 auto' : '0 0 auto',
                 }}
               >
-                Reload App
+                Back to Menu
               </button>
             </div>
           </div>

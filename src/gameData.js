@@ -22,10 +22,10 @@ export const PLAYER_CINDY = {
 };
 
 export const CLOTHING_LAYERS = [
-  { layer: 3, threshold: 76, status: 'FULLY DRESSED', icon: '👗' },
-  { layer: 2, threshold: 51, status: 'PARTIALLY UNDRESSED', icon: '🎀' },
-  { layer: 1, threshold: 26, status: 'UNDERWEAR ONLY', icon: '👙' },
-  { layer: 0, threshold: 0, status: 'EXPOSED', icon: '💋' },
+  { layer: 3, threshold: 76, status: 'STILL DRESSED... FOR NOW', icon: '👗' },
+  { layer: 2, threshold: 51, status: 'CLOTHES COMING OFF', icon: '🎀' },
+  { layer: 1, threshold: 26, status: 'BARELY COVERED', icon: '👙' },
+  { layer: 0, threshold: 0, status: 'COMPLETELY NAKED', icon: '💋' },
 ];
 
 export const GAME_MODES = {
@@ -34,48 +34,48 @@ export const GAME_MODES = {
     duration: 180,
     rounds: 1,
     startingHp: 0,
-    winCondition: 'Most submissions after 3 min',
+    winCondition: 'Most submissions in 3 min — make them tap fast 🥵',
   },
   best3: {
     name: 'Best of 3',
     duration: 300,
     rounds: 3,
     startingHp: 100,
-    winCondition: 'Win 2 out of 3 rounds',
+    winCondition: 'Win 2 out of 3 rounds — dominate the bed 💋',
   },
   endurance: {
     name: 'Endurance Match',
     duration: 900,
     rounds: 1,
     startingHp: 150,
-    winCondition: 'Highest HP at end',
+    winCondition: 'Outlast your lover — most endurance wins 💪',
   },
   ironwoman: {
     name: 'Iron Woman',
     duration: null,
     rounds: 1,
     startingHp: 100,
-    winCondition: 'I Quit match: clothing removed at 5/10/15 min, winner is last to quit',
+    winCondition: 'Strip match — clothes come off every 5 min. Last one standing wins. 🔥',
   },
   suddendeath: {
     name: 'Sudden Death',
     duration: null,
     rounds: 1,
     startingHp: 100,
-    winCondition: 'Shootout — land a finisher, opponent must answer or lose',
+    winCondition: 'Finisher shootout — land one, they must answer or you win 😈',
   },
   practice: {
     name: 'Practice Mode',
     duration: null,
     rounds: 1,
     startingHp: 100,
-    winCondition: 'Practice only',
+    winCondition: 'No stakes — just enjoy each other 💕',
   },
   eroticfight: {
     name: 'Erotic Fight',
     duration: 900,
     rounds: 1,
     startingHp: 0,
-    winCondition: 'Most points after 15 min',
+    winCondition: 'Most pleasure points after 15 min — make every move count 🔥',
   },
 };

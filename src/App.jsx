@@ -12,13 +12,13 @@ import { GAME_MODES } from './gameData';
 const ALL_MOVE_NAMES = Object.keys(MOVE_DETAILS);
 
 const MODE_PREVIEWS = [
-  { key: 'quick', title: 'Quick Match', blurb: 'Lightning three-minute duel built for warm-ups.', accent: '#ff4d6d' },
-  { key: 'best3', title: 'Best of 3', blurb: 'Classic trilogy where momentum matters.', accent: '#ffb347' },
-  { key: 'endurance', title: 'Endurance Match', blurb: 'Fifteen-minute attrition war for control freaks.', accent: '#9dffad' },
-  { key: 'ironwoman', title: 'Iron Woman', blurb: 'Clothing stakes escalate at 5/10/15, no excuses.', accent: '#ff89c2' },
-  { key: 'suddendeath', title: 'Sudden Death', blurb: 'Finishers unlocked. First to zero HP falls.', accent: '#fcd34d' },
-  { key: 'practice', title: 'Practice Mode', blurb: 'Sandbox for rehearsing holds without stakes.', accent: '#93c5fd' },
-  { key: 'eroticfight', title: 'Erotic Fight', blurb: 'Fifteen-minute sensual scoring race.', accent: '#ff1e56', featured: true },
+  { key: 'quick', title: 'Quick Match', blurb: 'Three minutes. Fast hands. First to submit wins. 🔥', accent: '#ff4d6d' },
+  { key: 'best3', title: 'Best of 3', blurb: 'Three rounds of bodies and pleasure. Momentum is everything.', accent: '#ffb347' },
+  { key: 'endurance', title: 'Endurance Match', blurb: 'Fifteen minutes of sweat and skin. Outlast them or break.', accent: '#9dffad' },
+  { key: 'ironwoman', title: 'Iron Woman', blurb: 'Clothes come off at 5/10/15 min. Scream I Quit or keep going. 🥵', accent: '#ff89c2' },
+  { key: 'suddendeath', title: 'Sudden Death', blurb: 'Finishers only. Land one — they answer or lose. Pure shootout. 😈', accent: '#fcd34d' },
+  { key: 'practice', title: 'Practice Mode', blurb: 'No stakes. Just exploring each other\'s moves. 😏', accent: '#93c5fd' },
+  { key: 'eroticfight', title: 'Erotic Fight', blurb: 'Fifteen minutes. Make each other scream. Most orgasms wins. 💦', accent: '#ff1e56', featured: true },
 ];
 
 function MainMenu({ onSelectMode, onOpenMoveSettings }) {
@@ -41,8 +41,8 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
   });
 
   const heroStats = [
-    { label: 'Signature Moves', value: ALL_MOVE_NAMES.length, detail: 'curated deck ready tonight' },
-    { label: 'Match Types', value: MODE_PREVIEWS.length, detail: 'pick a ritual, set the tone' },
+    { label: 'Sexy Moves', value: ALL_MOVE_NAMES.length, detail: 'ways to dominate, tease & pleasure' },
+    { label: 'Match Types', value: MODE_PREVIEWS.length, detail: 'pick your kink, set the mood' },
   ];
 
   return (
@@ -157,11 +157,11 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
                   background: 'rgba(255,255,255,0.02)',
                 }}
               >
-                UCW BedChamp • Bedroom Arena
+                UCW BedChamp • The Bedroom Arena 🔥
               </div>
               <div style={{ fontSize: isMobile ? '2.4em' : '3.3em', lineHeight: 1.05, fontWeight: 700 }}>
-                Red Velvet Bed Arena
-                <span style={{ color: '#ff1e56', display: 'block' }}>Lover's Gauntlet</span>
+                The Bed Is Your Arena
+                <span style={{ color: '#ff1e56', display: 'block' }}>Bodies. Pleasure. Domination.</span>
               </div>
               <p
                 style={{
@@ -171,7 +171,7 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
                   margin: 0,
                 }}
               >
-                Pillow-raked battleground with sultry penalties and decadent wagers meant for couples ready to perform.
+                Strip, wrestle, and make each other submit. Every move is a tease. Every pin is a promise. Who breaks first?
               </p>
               <div
                 style={{
@@ -222,7 +222,7 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
                     letterSpacing: '0.05em',
                   }}
                 >
-                  Tune Move Deck
+                  Customize Your Arsenal 💅
                 </button>
                 <div
                   style={{
@@ -239,7 +239,7 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
                     textAlign: 'center',
                   }}
                 >
-                  Refine your deck before stepping into the velvet pit.
+                  Pick which moves you want tonight. Enable the filthy ones. 😈
                 </div>
               </div>
             </div>
@@ -255,8 +255,8 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
             }}
           >
             <div style={{ marginBottom: isMobile ? 18 : 24 }}>
-              <div style={{ fontSize: isMobile ? '1em' : '1.1em', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#9aa5ff' }}>Choose your ritual</div>
-              <div style={{ fontSize: isMobile ? '1.8em' : '2.2em', fontWeight: 600 }}>Select a match, acknowledge the rules, then commit.</div>
+              <div style={{ fontSize: isMobile ? '1em' : '1.1em', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#9aa5ff' }}>What are you in the mood for?</div>
+              <div style={{ fontSize: isMobile ? '1.8em' : '2.2em', fontWeight: 600 }}>Pick a match. Read the rules. Then get in bed.</div>
             </div>
             <div
               style={{
@@ -326,7 +326,7 @@ function MainMenu({ onSelectMode, onOpenMoveSettings }) {
             color: '#9a8cff',
           }}
         >
-          UCW BedChamp • Designed for daring duos
+          UCW BedChamp • For couples who like it rough 💋
         </div>
       </div>
     </div>
@@ -498,7 +498,7 @@ function ModeRulesModal({ modeKey, onConfirm, onCancel }) {
               boxShadow: '0 12px 24px rgba(255,0,128,0.35)',
             }}
           >
-            OK, Start Match
+            Let's Do This 🔥
           </button>
           <button
             onClick={onCancel}
@@ -514,7 +514,7 @@ function ModeRulesModal({ modeKey, onConfirm, onCancel }) {
               cursor: 'pointer',
             }}
           >
-            Back
+            Not Yet
           </button>
         </div>
       </div>
