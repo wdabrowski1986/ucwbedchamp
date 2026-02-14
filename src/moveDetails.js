@@ -67,8 +67,8 @@ export const MOVE_DETAILS = {
     description: 'Pull your partner tight against your body — chest to chest — and squeeze. Feel their heartbeat against yours while they try to wriggle free.',
     image: 'body-lock.png',
   },
-  'Pillow Smack': {
-    description: 'Grab a pillow and smack your partner right in the face with it. Playful, dramatic, and the perfect setup to pounce on them while they recover.',
+  'Body Slam': {
+    description: 'Charge across the bed and slam your full body into your partner, knocking them flat. They hit the mattress hard with you on top — heavy, hot, and pinned.',
     image: 'the-bulldozer.png',
   },
   'Belly Tickle': {
@@ -84,16 +84,15 @@ export const MOVE_DETAILS = {
   'Thigh Squeeze': {
     description: "Grab your partner's inner thigh and squeeze slowly. Watch their eyes and feel their muscles tense under your grip.",
   },
-  'Blanket Burrito': {
-    description: "Wrap your partner up tight in the blanket so their arms are trapped against their body. They wiggle and struggle while you watch — they escape or they submit.",
+  '69 Pin': {
+    description: 'Flip around so your mouth is between their thighs and theirs is between yours. Both pinned, both tasting, both squirming — nobody can escape this one.',
     image: '69-Pin.png',
   },
   'Leg Tangle': {
     description: "Slide your legs between your partner's and tangle them up so neither of you can pull apart. Hips locked together, skin on skin.",
-    image: 'grapevine-hold.png',
   },
   'Slow Dance': {
-    description: 'Pull your partner close, bodies pressed together, and sway slow. Let your hands wander while the tension melts into something warmer.',
+    description: 'Stand in front of your partner and show off — slow turns, hands trailing your own body, letting them look but not touch. Make them want you before you let them have you.',
     image: 'the-display.png',
   },
 
@@ -201,7 +200,7 @@ export const MOVE_DETAILS = {
     image: 'table hj.png',
   },
   'Thigh Ride': {
-    description: "Both naked — Cindy slides herself between Wayne's bare thighs and grinds slow. Skin drags on skin with nothing between them.",
+    description: "Both naked — Cindy squeezes her thighs around Wayne and grinds him between them. Skin drags on skin with nothing between them, and she controls every stroke.",
     image: 'thighjob.png',
   },
   'Foot Trap Tease': {

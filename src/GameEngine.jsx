@@ -6,12 +6,12 @@ const MOVES = [
   // General Moves (either player)
   { name: 'Sit On Top', type: 'Physical', damage: 20, cost: 15, accuracy: 85, special: '' },
   { name: 'Bear Hug Hold', type: 'Challenge', damage: 25, cost: 20, accuracy: 80, special: 'Crush them against you until they melt' },
-  { name: 'Pillow Smack', type: 'Strike', damage: 15, cost: 10, accuracy: 90, special: '' },
+  { name: 'Body Slam', type: 'Strike', damage: 15, cost: 10, accuracy: 90, special: '' },
   { name: 'Belly Tickle', type: 'Strike', damage: 18, cost: 12, accuracy: 88, special: '' },
   { name: 'Chest Poke', type: 'Strike', damage: 17, cost: 11, accuracy: 89, special: '' },
   { name: 'Booty Slap', type: 'Strike', damage: 19, cost: 13, accuracy: 87, special: '' },
   { name: 'Thigh Squeeze', type: 'Strike', damage: 16, cost: 10, accuracy: 90, special: '' },
-  { name: 'Blanket Burrito', type: 'Physical', damage: 30, cost: 25, accuracy: 75, special: 'Wrap them tight — they wiggle free or give in' },
+  { name: '69 Pin', type: 'Physical', damage: 30, cost: 25, accuracy: 75, special: 'Both pinned, both tasting — nobody escapes' },
   { name: 'Leg Tangle', type: 'Physical', damage: 15, cost: 15, accuracy: 90, special: '' },
   { name: 'Slow Dance', type: 'Sensual', damage: -10, cost: 5, accuracy: 95, special: 'Healing' },
   // Cindy's Moves
