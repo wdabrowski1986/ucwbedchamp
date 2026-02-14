@@ -356,6 +356,7 @@ function GameEngine({ modeKey, enabledMoves }) {
       if (!move || matchWinner) return;
       setSubmitted(true);
       setLastResolvedMove({ name: move.name, type: move.type, by: attacker, resolved: true });
+      setLastMoveName(prev => ({ ...prev, [attacker]: move.name }));
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
       const attackerName = getRingName(attacker);
       const defenderName = getRingName(defender);
@@ -403,6 +404,7 @@ function GameEngine({ modeKey, enabledMoves }) {
       if (!move || matchWinner) return;
       setSubmitted(true);
       setLastResolvedMove({ name: move.name, type: move.type, resolved: false });
+      setLastMoveName(prev => ({ ...prev, [attacker]: move.name }));
       const defender = attacker === 'Wayne' ? 'Cindy' : 'Wayne';
       const defenderName = getRingName(defender);
       setMessage(`${defenderName} escapes ${move.name} — the belt stays in question!`);
@@ -446,7 +448,8 @@ function GameEngine({ modeKey, enabledMoves }) {
 
   // Deck system for move selection
   const [moveDeck, setMoveDeck] = useState([]);
-  const [usedMoves, setUsedMoves] = useState([]);
+  const [usedMoves, setUsedMoves] = useState({ Wayne: [], Cindy: [] });
+  const [lastMoveName, setLastMoveName] = useState({ Wayne: null, Cindy: null });
 
   const resetMatch = () => {
     const freshAttacker = rollAttacker();
@@ -477,7 +480,8 @@ function GameEngine({ modeKey, enabledMoves }) {
     setVictorySubheading('');
     setLastResolvedMove(null);
     setMoveDeck([]);
-    setUsedMoves([]);
+    setUsedMoves({ Wayne: [], Cindy: [] });
+    setLastMoveName({ Wayne: null, Cindy: null });
   };
 
   function buildMoveDeck() {
@@ -510,8 +514,12 @@ function GameEngine({ modeKey, enabledMoves }) {
 
   useEffect(() => {
     setMoveDeck(buildMoveDeck());
-    setUsedMoves([]);
   }, [enabledMoves, modeKey, attacker]);
+
+  useEffect(() => {
+    setUsedMoves({ Wayne: [], Cindy: [] });
+    setLastMoveName({ Wayne: null, Cindy: null });
+  }, [enabledMoves, modeKey]);
 
   function randomMove() {
     if (moveDeck.length === 0) return null;
@@ -527,16 +535,19 @@ function GameEngine({ modeKey, enabledMoves }) {
       pool = nonSensualMoves;
     }
 
-    let history = usedMoves;
+    const uniqueNames = Array.from(new Set(pool.map(m => m.name)));
+    const uniqueLimit = uniqueNames.length || 1;
+
+    let history = usedMoves[attacker] || [];
     let available = pool.filter(m => !history.includes(m.name));
     if (available.length === 0) {
       history = [];
       available = pool;
     }
 
-    if (history.length > 0) {
-      const lastMove = history[history.length - 1];
-      const filtered = available.filter(m => m.name !== lastMove);
+    const recentName = history.length > 0 ? history[history.length - 1] : lastMoveName[attacker];
+    if (recentName) {
+      const filtered = available.filter(m => m.name !== recentName);
       if (filtered.length > 0) {
         available = filtered;
       }
@@ -545,7 +556,8 @@ function GameEngine({ modeKey, enabledMoves }) {
     const idx = Math.floor(Math.random() * available.length);
     const nextMove = available[idx];
     const nextHistory = [...history, nextMove.name];
-    setUsedMoves(nextHistory);
+    const trimmedHistory = nextHistory.slice(-uniqueLimit);
+    setUsedMoves(prev => ({ ...prev, [attacker]: trimmedHistory }));
     return nextMove;
   }
 
